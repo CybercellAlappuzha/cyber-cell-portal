@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:,">
+<title>Cyber Cell Request Proforma</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="top">
+  <h1>Cyber Cell Request Proforma</h1>
+  <span class="sub">Fill in, generate the PDF, print and send to the Cyber Cell</span>
+</header>
+<div class="wrap">
+
+  <div class="card">
+    <p class="hint" style="margin:0">
+      Nothing you enter here is saved or sent anywhere — the PDF is created in your own
+      browser. Fill the form, press <strong>Generate PDF</strong>, then print it and route it
+      to the Cyber Cell the usual way.
+    </p>
+  </div>
+
+  <form id="pfForm" novalidate>
+    <div id="formMsg"></div>
+
+    <fieldset>
+      <legend>Case particulars</legend>
+      <div class="grid">
+        <div class="field w2">
+          <label for="pfOffice">Police Office &amp; Log Book No. <span class="req">*</span></label>
+          <input type="text" id="pfOffice" placeholder="Kareelakulangara PS — Log Book No. 45/2026">
+        </div>
+        <div class="field w2">
+          <label for="pfCrime">Crime No., Sec. of Law &amp; Police Station <span class="req">*</span></label>
+          <input type="text" id="pfCrime" placeholder="848/2026 u/s 318(4) BNS, Kareelakulangara PS">
+        </div>
+        <div class="field w2">
+          <label for="pfIo">Investigating Officer — Name &amp; Rank <span class="req">*</span></label>
+          <input type="text" id="pfIo" placeholder="Shri A. B. C., Inspector of Police">
+        </div>
+        <div class="field">
+          <label for="pfOccur">Date of Occurrence</label>
+          <input type="date" id="pfOccur">
+        </div>
+        <div class="field">
+          <label for="pfReport">Date of Report</label>
+          <input type="date" id="pfReport">
+        </div>
+        <div class="field w2">
+          <label for="pfComplainant">Name of Complainant</label>
+          <input type="text" id="pfComplainant">
+        </div>
+        <div class="field w2">
+          <label for="pfBrief">Brief of the Case / Enquiry <span class="req">*</span></label>
+          <textarea id="pfBrief" rows="3" placeholder="The brief is that … including how the identifier(s) below are connected with the crime."></textarea>
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Subscriber / user details <span class="req">*</span></legend>
+      <p class="hint">One row per number, IMEI, or Aadhaar number.</p>
+      <div id="idRows" class="rows-repeat"></div>
+      <div class="actions"><button type="button" class="secondary small" id="addRowBtn">+ Add row</button></div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Required details <span class="req">*</span></legend>
+      <p class="hint">Tick everything that is being requested. Each one you tick produces its own separate PDF
+        proforma — a station ticking CDR, IMEI Trace and Aadhaar search gets 3 separate PDFs to print and send.
+        Address is the exception: tick it alongside CDR, CAF, or Certified copy and it merges into that PDF
+        instead of making a separate one — it only gets its own PDF when none of those three are ticked.
+        Address doesn't apply to IMEI Trace, so it's turned off and disabled while IMEI Trace is ticked.</p>
+      <div class="check-grid" style="margin-bottom:12px">
+        <label class="check-row"><input type="checkbox" id="pfAddress" checked> Address (SDR)</label>
+        <label class="check-row"><input type="checkbox" id="pfCaf"> CAF</label>
+        <label class="check-row"><input type="checkbox" id="pfCdr"> CDR</label>
+        <label class="check-row"><input type="checkbox" id="pfIpdr"> IPDR</label>
+        <label class="check-row"><input type="checkbox" id="pfImeiTrace"> IMEI Trace</label>
+        <label class="check-row"><input type="checkbox" id="pfCertified"> Certified copy</label>
+        <label class="check-row"><input type="checkbox" id="pfAadhaar"> Aadhaar search</label>
+        <label class="check-row"><input type="checkbox" id="pfSim"> SIM number search</label>
+      </div>
+
+      <div class="grid" id="imeiFromField" style="display:none; margin-bottom:10px">
+        <div class="field">
+          <label for="pfImeiFrom">IMEI trace period — from <span class="req">*</span></label>
+          <input type="date" id="pfImeiFrom">
+        </div>
+        <div class="field">
+          <label for="pfImeiTo">IMEI trace period — to <span class="req">*</span></label>
+          <input type="date" id="pfImeiTo">
+        </div>
+      </div>
+
+      <div class="grid" id="periodFields" style="display:none">
+        <div class="field">
+          <label for="pfFrom">Required period — from <span class="req">*</span></label>
+          <input type="date" id="pfFrom">
+        </div>
+        <div class="field">
+          <label for="pfTo">Required period — to <span class="req">*</span></label>
+          <input type="date" id="pfTo">
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Justification &amp; remarks</legend>
+      <div class="grid">
+        <div class="field w2">
+          <label for="pfJust">Justification of the Investigating Officer for taking the details <span class="req">*</span></label>
+          <textarea id="pfJust" rows="3"></textarea>
+        </div>
+        <div class="field w2">
+          <label for="pfRemarks">Remarks if any</label>
+          <textarea id="pfRemarks" rows="2" placeholder="ILD hits from XX.XX.XXXX"></textarea>
+        </div>
+      </div>
+    </fieldset>
+
+    <div class="card">
+      <p class="hint" style="margin:0">
+        The PDF ends with the office's standard Declaration text and a "Verified by ISHO / Recommended
+        by SDPO" signature box, left blank for them to sign and seal by hand after printing.
+      </p>
+    </div>
+
+    <div class="actions">
+      <button type="submit" id="genBtn">Generate PDF</button>
+    </div>
+  </form>
+</div>
+
+<script src="vendor/jspdf.umd.min.js"></script>
+<script src="vendor/jspdf.plugin.autotable.min.js"></script>
+<script src="pdf-render.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

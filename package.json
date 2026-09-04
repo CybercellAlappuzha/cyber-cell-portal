@@ -1,0 +1,13 @@
+{
+  "name": "cyber-cell-portal",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Station-facing web form that generates the Cyber Cell CDR / CAF / IPDR / IMEI / Aadhaar / address-search proforma as a PDF, entirely in the browser. No accounts, no database, no npm dependencies.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=14"
+  }
+}
