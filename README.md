@@ -6,6 +6,28 @@ PDF** — the PDF is created entirely in the browser (same layout the Cyber Cell
 uses) and downloads immediately, ready to print and send. No accounts, no database,
 nothing saved or sent anywhere by this app.
 
+## Live — use it from any station, no setup
+
+**https://cyberabhijithcell.github.io/cyber-cell-portal/**
+
+Any station, anywhere, just opens that link in a browser. Nothing to install, no
+server to run, no LAN required — it's a static page hosted on GitHub Pages, and the
+PDF is still generated entirely in the visitor's own browser (nothing typed into the
+form is saved or sent anywhere). Share that link with other stations directly.
+
+Repo: https://github.com/cyberabhijithcell/cyber-cell-portal — Pages is served from
+the `docs/` folder (a copy of `public/` with relative asset paths, since Pages serves
+this repo under `/cyber-cell-portal/` rather than the domain root). To publish a
+change: edit the files under `public/` as usual, then copy the same changes into
+`docs/` (or re-run the copy + path-fix step) and push to `main` — Pages rebuilds
+automatically in under a minute.
+
+## Running it locally / on a station's own network instead
+
+The instructions below are for running your own local copy with `server.js` — most
+stations won't need this now that the link above works from anywhere, but it's still
+useful for offline use or local development.
+
 ## Requirements
 
 Just Node.js (any reasonably recent version — no packages to install, no `npm install`
