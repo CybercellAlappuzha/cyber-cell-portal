@@ -68,7 +68,8 @@ On the LAN:        http://192.168.x.x:3939/   (share this with other stations)
 
 ## What it asks for
 
-Case particulars (police office & log book number, crime number and section, IO name
+Case particulars (police office & log book number, crime number, section of law and
+police station as three separate fields, IO name
 & rank, dates, complainant, brief of the case), one row per subscriber/IMEI/Aadhaar
 number with name and reason, and what's being requested — 8 independent items: Address
 (SDR), CAF, CDR, IPDR, IMEI Trace, Certified copy, Aadhaar search, SIM number search

@@ -91,10 +91,24 @@
 
     const imeiTraceChecked = checked('pfImeiTrace');
 
+    // Crime No., Sec. of Law and Police Station are three separate fields in
+    // the form (station officers asked for them in their own columns rather
+    // than one combined free-text box) but the PDF still prints them as one
+    // "Crime No, Sec of Law & Police Station" row, same as the office's own
+    // paper template — so they're joined back into pfCrime here for
+    // pdf-render.js and the filename logic to keep using unchanged.
+    const crimeNo = val('pfCrimeNo');
+    const crimeSec = val('pfCrimeSec');
+    const crimePs = val('pfCrimePs');
+    const pfCrime = [crimeNo, crimeSec].filter(Boolean).join(' ') + (crimePs ? `, ${crimePs}` : '');
+
     return {
       _numbers: numbers,
       pfOffice: val('pfOffice'),
-      pfCrime: val('pfCrime'),
+      pfCrimeNo: crimeNo,
+      pfCrimeSec: crimeSec,
+      pfCrimePs: crimePs,
+      pfCrime,
       pfIo: val('pfIo'),
       pfOccur: val('pfOccur'),
       pfReport: val('pfReport'),
@@ -124,7 +138,9 @@
   function validate(v) {
     const errors = [];
     if (!v.pfOffice) errors.push('Police Office & Log Book No. is required.');
-    if (!v.pfCrime) errors.push('Crime No., Sec. of Law & Police Station is required.');
+    if (!v.pfCrimeNo) errors.push('Crime No. is required.');
+    if (!v.pfCrimeSec) errors.push('Sec. of Law is required.');
+    if (!v.pfCrimePs) errors.push('Police Station is required.');
     if (!v.pfIo) errors.push('Investigating Officer — Name & Rank is required.');
     if (!v.pfBrief) errors.push('Brief of the Case / Enquiry is required.');
     if (!v._rowCount) errors.push('At least one subscriber / identifier row is required.');
@@ -159,10 +175,9 @@
       .slice(0, 40) || 'request';
   }
 
-  /** Pulls just the crime-number-looking lead of "848/2026 u/s 318(4) BNS, ..." for a tidy filename. */
-  function crimeNoForFilename(pfCrime) {
-    const m = String(pfCrime || '').match(/^[^,]*?(?=\s+u\/?s\.?\s|,|$)/i);
-    return slug(m ? m[0] : pfCrime);
+  /** Crime No. is now its own field, so the filename can use it directly. */
+  function crimeNoForFilename(pfCrimeNo) {
+    return slug(pfCrimeNo);
   }
 
   const form = qs('#pfForm');
@@ -211,7 +226,7 @@
 
     const today = new Date();
     const dateStr = `${today.getFullYear()}${String(today.getMonth() + 1).padStart(2, '0')}${String(today.getDate()).padStart(2, '0')}`;
-    const crimeTag = crimeNoForFilename(v.pfCrime);
+    const crimeTag = crimeNoForFilename(v.pfCrimeNo);
     const filenames = [];
 
     function generateOne(i) {
