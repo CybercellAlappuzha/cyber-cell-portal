@@ -260,6 +260,7 @@
       const p = r.split('|').map((s) => s.trim());
       return [p[0] || '', p[1] || '', p[2] || ''];
     });
+    const subjRealCount = subj.length;
     while (subj.length < 3) subj.push(['', '', '']);
 
     const sel = selection(v);
@@ -267,23 +268,82 @@
     const idCol = v.pfAadhaar || v.pfSim ? 'Mobile / IMEI / Aadhaar Number' : 'Mobile / IMEI Number';
     const sw = (CW - L1) / 3;
     const subjStart = doc.lastAutoTable.finalY;
-    doc.autoTable({
-      startY: subjStart,
-      margin: { left: MM.L, right: MM.R },
-      head: [['', idCol, 'Name & Address', 'Reason or connection of the number with the crime / enquiry']],
-      body: subj.map((r) => ['', r[0], r[1], r[2]]),
-      styles: { font: 'times', fontSize: 10, lineColor: 20, lineWidth: 0.2, cellPadding: 1.6, valign: 'top' },
-      headStyles: { fillColor: false, textColor: 20, fontStyle: 'bold', lineWidth: 0.2, lineColor: 20 },
-      // Columns 1-3 hold what the officer typed in for each subscriber row —
-      // bold, same as every other entered detail on the proforma.
-      columnStyles: {
-        0: { cellWidth: L1 },
-        1: { cellWidth: sw, fontStyle: 'bold' },
-        2: { cellWidth: sw, fontStyle: 'bold' },
-        3: { cellWidth: sw, fontStyle: 'bold' },
-      },
-      theme: 'grid',
-    });
+
+    // A station can enter a lot of subscriber rows for one case, and the
+    // whole proforma should still fit on a single page rather than spill
+    // onto a second one. As the row count climbs, first shrink the table
+    // (font size + padding) so more rows fit in the same height; past
+    // SUBJ_NUMBERS_ONLY_THRESHOLD rows even the smallest readable size
+    // isn't enough, so Name & Address / Reason are dropped and the table
+    // becomes a compact multi-column list of just the numbers instead.
+    // Both sets of breakpoints below were found empirically (Playwright +
+    // pdfplumber, realistic short single-line subscriber data), not computed
+    // analytically, since row height depends on jsPDF-autotable's own text
+    // wrapping in ways that are hard to predict exactly.
+    let subjFont;
+    let subjPad;
+    if (subjRealCount <= 5) { subjFont = 10; subjPad = 1.6; }
+    else if (subjRealCount <= 6) { subjFont = 9; subjPad = 1.2; }
+    else if (subjRealCount <= 8) { subjFont = 8; subjPad = 0.9; }
+    else if (subjRealCount <= 11) { subjFont = 7; subjPad = 0.6; }
+    else { subjFont = 6.5; subjPad = 0.5; }
+    const SUBJ_NUMBERS_ONLY_THRESHOLD = 13;
+    const numbersOnly = subjRealCount > SUBJ_NUMBERS_ONLY_THRESHOLD;
+
+    if (!numbersOnly) {
+      doc.autoTable({
+        startY: subjStart,
+        margin: { left: MM.L, right: MM.R },
+        head: [['', idCol, 'Name & Address', 'Reason or connection of the number with the crime / enquiry']],
+        body: subj.map((r) => ['', r[0], r[1], r[2]]),
+        styles: { font: 'times', fontSize: subjFont, lineColor: 20, lineWidth: 0.2, cellPadding: subjPad, valign: 'top' },
+        headStyles: { fillColor: false, textColor: 20, fontStyle: 'bold', lineWidth: 0.2, lineColor: 20, fontSize: Math.min(10, subjFont + 0.5) },
+        // Columns 1-3 hold what the officer typed in for each subscriber row —
+        // bold, same as every other entered detail on the proforma.
+        columnStyles: {
+          0: { cellWidth: L1 },
+          1: { cellWidth: sw, fontStyle: 'bold' },
+          2: { cellWidth: sw, fontStyle: 'bold' },
+          3: { cellWidth: sw, fontStyle: 'bold' },
+        },
+        theme: 'grid',
+      });
+    } else {
+      // Name & Address / Reason abandoned — pack several numbers per row so
+      // a long list still fits on one page. Column count and font/padding
+      // step up together as the row count climbs (calibrated the same way
+      // as the tiers above).
+      const nums = subj.map((r) => r[0]).filter(Boolean);
+      let numCols;
+      let numFont;
+      let numPad;
+      if (subjRealCount <= 20) { numCols = 2; numFont = 8; numPad = 0.8; }
+      else if (subjRealCount <= 30) { numCols = 3; numFont = 8; numPad = 0.8; }
+      else if (subjRealCount <= 39) { numCols = 3; numFont = 7; numPad = 0.5; }
+      else if (subjRealCount <= 52) { numCols = 4; numFont = 7; numPad = 0.5; }
+      else if (subjRealCount <= 75) { numCols = 5; numFont = 6.5; numPad = 0.4; }
+      else { numCols = 6; numFont = 6; numPad = 0.3; }
+      const numRows = [];
+      for (let i = 0; i < nums.length; i += numCols) {
+        const row = [''];
+        for (let c = 0; c < numCols; c += 1) row.push(nums[i + c] || '');
+        numRows.push(row);
+      }
+      const nw = (CW - L1) / numCols;
+      const head = [''].concat(Array(numCols).fill(idCol));
+      const colStyles = { 0: { cellWidth: L1 } };
+      for (let c = 1; c <= numCols; c += 1) colStyles[c] = { cellWidth: nw, fontStyle: 'bold' };
+      doc.autoTable({
+        startY: subjStart,
+        margin: { left: MM.L, right: MM.R },
+        head: [head],
+        body: numRows,
+        styles: { font: 'times', fontSize: numFont, lineColor: 20, lineWidth: 0.2, cellPadding: numPad, valign: 'top' },
+        headStyles: { fillColor: false, textColor: 20, fontStyle: 'bold', lineWidth: 0.2, lineColor: 20, fontSize: numFont },
+        columnStyles: colStyles,
+        theme: 'grid',
+      });
+    }
 
     const subjEnd = doc.lastAutoTable.finalY;
     doc.setFillColor(255, 255, 255);
