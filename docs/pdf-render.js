@@ -179,10 +179,14 @@
       doc.setFont('times', 'normal');
       doc.text('From', x + 32, cy);
       doc.rect(x + 42, cy - 4, 26, 5.5);
+      doc.setFont('times', 'bold');
       doc.text(fmtDate(v.pfFrom), x + 43.5, cy);
+      doc.setFont('times', 'normal');
       doc.text('To', x + 71, cy);
       doc.rect(x + 77, cy - 4, 26, 5.5);
+      doc.setFont('times', 'bold');
       doc.text(fmtDate(v.pfTo), x + 78.5, cy);
+      doc.setFont('times', 'normal');
       cy += 7;
     }
 
@@ -192,10 +196,14 @@
       doc.setFont('times', 'normal');
       doc.text('From', x + 38, cy);
       doc.rect(x + 48, cy - 4, 24, 5.5);
+      doc.setFont('times', 'bold');
       doc.text(fmtDate(v.pfImeiFrom), x + 49.5, cy);
+      doc.setFont('times', 'normal');
       doc.text('To', x + 76, cy);
       doc.rect(x + 82, cy - 4, 24, 5.5);
+      doc.setFont('times', 'bold');
       doc.text(fmtDate(v.pfImeiTo), x + 83.5, cy);
+      doc.setFont('times', 'normal');
       cy += 7;
     }
   }
@@ -241,7 +249,10 @@
       margin: { left: MM.L, right: MM.R },
       body: rows,
       styles: { font: 'times', fontSize: 10, lineColor: 20, lineWidth: 0.2, cellPadding: 1.5, valign: 'top' },
-      columnStyles: { 0: { cellWidth: L1, fontStyle: 'bold' }, 1: { cellWidth: CW - L1 } },
+      // Column 0 is the field label (e.g. "Crime No, Sec of Law & Police
+      // Station"); column 1 is what the officer actually typed in — bold so
+      // every entered detail stands out clearly on the printed proforma.
+      columnStyles: { 0: { cellWidth: L1, fontStyle: 'bold' }, 1: { cellWidth: CW - L1, fontStyle: 'bold' } },
       theme: 'grid',
     });
 
@@ -263,7 +274,14 @@
       body: subj.map((r) => ['', r[0], r[1], r[2]]),
       styles: { font: 'times', fontSize: 10, lineColor: 20, lineWidth: 0.2, cellPadding: 1.6, valign: 'top' },
       headStyles: { fillColor: false, textColor: 20, fontStyle: 'bold', lineWidth: 0.2, lineColor: 20 },
-      columnStyles: { 0: { cellWidth: L1 }, 1: { cellWidth: sw }, 2: { cellWidth: sw }, 3: { cellWidth: sw } },
+      // Columns 1-3 hold what the officer typed in for each subscriber row —
+      // bold, same as every other entered detail on the proforma.
+      columnStyles: {
+        0: { cellWidth: L1 },
+        1: { cellWidth: sw, fontStyle: 'bold' },
+        2: { cellWidth: sw, fontStyle: 'bold' },
+        3: { cellWidth: sw, fontStyle: 'bold' },
+      },
       theme: 'grid',
     });
 
@@ -301,7 +319,7 @@
         ],
       ],
       styles: { font: 'times', fontSize: 10, lineColor: 20, lineWidth: 0.2, cellPadding: 1.5, valign: 'top' },
-      columnStyles: { 0: { cellWidth: L1, fontStyle: 'bold' }, 1: { cellWidth: CW - L1 } },
+      columnStyles: { 0: { cellWidth: L1, fontStyle: 'bold' }, 1: { cellWidth: CW - L1, fontStyle: 'bold' } },
       theme: 'grid',
     });
     cur.y = doc.lastAutoTable.finalY + 5;
