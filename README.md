@@ -8,21 +8,19 @@ nothing saved or sent anywhere by this app.
 
 ## Live — use it from any station, no setup
 
-**https://cyberabhijithcell.github.io/**
+**https://cybercellalappuzha.github.io/cyber-cell-portal/**
 
 Any station, anywhere, just opens that link in a browser. Nothing to install, no
 server to run, no LAN required — it's a static page hosted on GitHub Pages, and the
 PDF is still generated entirely in the visitor's own browser (nothing typed into the
 form is saved or sent anywhere). Share that link with other stations directly.
 
-Repo: https://github.com/cyberabhijithcell/cyberabhijithcell.github.io (a GitHub
-"user site" repo — the special name is what gets it the short root URL above instead
-of a `/<repo-name>/` subpath) — Pages is served from the `docs/` folder (a copy of
-`public/` with relative asset paths, kept that way even though it's now at the domain
-root since relative paths still work fine and cost nothing). To publish a change:
-edit the files under `public/` as usual, then copy the same changes into `docs/` (or
-re-run the copy + path-fix step) and push to `main` — Pages rebuilds automatically in
-under a minute.
+Repo: https://github.com/CybercellAlappuzha/cyber-cell-portal — Pages is
+served from the `docs/` folder (a copy of `public/` with relative asset paths, since
+Pages serves this repo under `/cyber-cell-portal/` rather than the domain root). To
+publish a change: edit the files under `public/` as usual, then copy the same changes
+into `docs/` (or re-run the copy + path-fix step) and push to `main` — Pages rebuilds
+automatically in under a minute.
 
 ## Running it locally / on a station's own network instead
 
