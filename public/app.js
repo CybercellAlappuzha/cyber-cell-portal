@@ -45,6 +45,28 @@
   ['pfCdr', 'pfIpdr', 'pfImeiTrace'].forEach((id) => qs('#' + id).addEventListener('change', syncConditionals));
   syncConditionals();
 
+  // A required period longer than 6 months needs prior permission from the
+  // District Police Chief before the request can go to the Cyber Cell — flag
+  // it live as soon as both dates of a period are filled in, for CDR/IPDR's
+  // "Required period" and for the IMEI trace period.
+  function exceedsSixMonths(fromStr, toStr) {
+    if (!fromStr || !toStr) return false;
+    const from = new Date(fromStr);
+    const to = new Date(toStr);
+    if (Number.isNaN(from.getTime()) || Number.isNaN(to.getTime())) return false;
+    const limit = new Date(from);
+    limit.setMonth(limit.getMonth() + 6);
+    return to > limit;
+  }
+  const cdrPeriodWarn = qs('#cdrPeriodWarn');
+  const imeiPeriodWarn = qs('#imeiPeriodWarn');
+  function updatePeriodWarnings() {
+    cdrPeriodWarn.style.display = exceedsSixMonths(qs('#pfFrom').value, qs('#pfTo').value) ? '' : 'none';
+    imeiPeriodWarn.style.display = exceedsSixMonths(qs('#pfImeiFrom').value, qs('#pfImeiTo').value) ? '' : 'none';
+  }
+  ['pfFrom', 'pfTo', 'pfImeiFrom', 'pfImeiTo'].forEach((id) => qs('#' + id).addEventListener('change', updatePeriodWarnings));
+  updatePeriodWarnings();
+
   /** Each entry is one independently-requestable item: checkbox id, the flag name
    *  passed into pdf-render.js, and a short tag used in the downloaded filename. */
   const REQUEST_TYPES = [
@@ -168,6 +190,20 @@
     return errors;
   }
 
+  /** Non-blocking: a required period over 6 months still generates the PDF,
+   *  but the officer needs to know DPC permission is required before it's
+   *  actually sent to the Cyber Cell. */
+  function periodWarnings(v) {
+    const warnings = [];
+    if ((v.pfCdr || v.pfIpdr) && exceedsSixMonths(v.pfFrom, v.pfTo)) {
+      warnings.push('Required period is longer than 6 months — prior permission from the District Police Chief must be obtained before sending this request.');
+    }
+    if (v.pfImeiTrace && exceedsSixMonths(v.pfImeiFrom, v.pfImeiTo)) {
+      warnings.push('IMEI trace period is longer than 6 months — prior permission from the District Police Chief must be obtained before sending this request.');
+    }
+    return warnings;
+  }
+
   function slug(s) {
     return String(s || '')
       .replace(/[^A-Za-z0-9]+/g, '_')
@@ -195,6 +231,13 @@
       formMsg.scrollIntoView({ behavior: 'smooth', block: 'start' });
       return;
     }
+
+    const warnings = periodWarnings(v);
+    const warnHtml = warnings.length
+      ? `<div class="msg warn"><strong>Before you send this request:</strong><ul>${warnings
+          .map((m) => `<li>${esc(m)}</li>`)
+          .join('')}</ul></div>`
+      : '';
 
     const genBtn = qs('#genBtn');
     genBtn.disabled = true;
@@ -233,7 +276,7 @@
       if (i >= jobs.length) {
         genBtn.disabled = false;
         genBtn.textContent = 'Generate PDF';
-        formMsg.innerHTML = `<div class="msg ok">Generated ${filenames.length} PDF${filenames.length === 1 ? '' : 's'} — one per item ticked under "Required details" (Address merges into CDR / CAF / Certified copy when ticked alongside them):<ul>${filenames
+        formMsg.innerHTML = `${warnHtml}<div class="msg ok">Generated ${filenames.length} PDF${filenames.length === 1 ? '' : 's'} — one per item ticked under "Required details" (Address merges into CDR / CAF / Certified copy when ticked alongside them):<ul>${filenames
           .map((f) => `<li>${esc(f)}</li>`)
           .join('')}</ul>Check your browser's downloads.</div>`;
         formMsg.scrollIntoView({ behavior: 'smooth', block: 'start' });

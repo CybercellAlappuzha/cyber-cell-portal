@@ -11,6 +11,8 @@
   --danger-soft: #fbeceb;
   --ok: #1e7d40;
   --ok-soft: #eaf7ee;
+  --warn: #8a5a00;
+  --warn-soft: #fdf3dc;
 }
 
 * { box-sizing: border-box; }
@@ -87,7 +89,9 @@ button:disabled { opacity: .55; cursor: not-allowed; }
 .msg { padding: 10px 14px; border-radius: 7px; font-size: 13.5px; margin: 0 0 14px; }
 .msg.error { background: var(--danger-soft); color: var(--danger); border: 1px solid #f2c6c2; }
 .msg.ok { background: var(--ok-soft); color: var(--ok); border: 1px solid #bfe6cb; }
+.msg.warn { background: var(--warn-soft); color: var(--warn); border: 1px solid #f0dca3; }
 .msg ul { margin: 4px 0 0 18px; padding: 0; }
+.period-warn { margin: -2px 0 10px; }
 
 .rows-repeat { display: flex; flex-direction: column; gap: 8px; }
 .rows-repeat .row-item { display: grid; grid-template-columns: 1fr 1fr 1.4fr auto; gap: 8px; }
