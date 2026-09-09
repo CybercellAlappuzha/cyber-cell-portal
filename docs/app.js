@@ -113,6 +113,14 @@
 
     const imeiTraceChecked = checked('pfImeiTrace');
 
+    // Police Office and Log Book No. are two separate fields in the form but
+    // the PDF still prints them as one "Police Office & Log Book No." row,
+    // same as the office's own paper template — joined back into pfOffice
+    // here, same pattern as the Crime No./Sec./PS split below.
+    const policeOffice = val('pfPoliceOffice');
+    const logBook = val('pfLogBook');
+    const pfOffice = policeOffice + (logBook ? ` — Log Book No. ${logBook}` : '');
+
     // Crime No., Sec. of Law and Police Station are three separate fields in
     // the form (station officers asked for them in their own columns rather
     // than one combined free-text box) but the PDF still prints them as one
@@ -126,7 +134,9 @@
 
     return {
       _numbers: numbers,
-      pfOffice: val('pfOffice'),
+      pfPoliceOffice: policeOffice,
+      pfLogBook: logBook,
+      pfOffice,
       pfCrimeNo: crimeNo,
       pfCrimeSec: crimeSec,
       pfCrimePs: crimePs,
@@ -159,7 +169,8 @@
 
   function validate(v) {
     const errors = [];
-    if (!v.pfOffice) errors.push('Police Office & Log Book No. is required.');
+    if (!v.pfPoliceOffice) errors.push('Police Office is required.');
+    if (!v.pfLogBook) errors.push('Log Book No. is required.');
     if (!v.pfCrimeNo) errors.push('Crime No. is required.');
     if (!v.pfCrimeSec) errors.push('Sec. of Law is required.');
     if (!v.pfCrimePs) errors.push('Police Station is required.');
