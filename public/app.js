@@ -121,21 +121,39 @@
   syncConditionals();
 
   // The "Subscriber / user details" hint changes with what's ticked under
-  // "Required details", so a station knows exactly what to put in each row
-  // before they start filling them in: IMEI Trace wants IMEIs, CAF/CDR/IPDR
-  // want phone numbers, and anything else falls back to the general hint.
+  // "Required details", so a station knows exactly what identifier to put
+  // in each row before they start filling them in. Each request type maps
+  // to the kind of identifier it needs; when several types are ticked at
+  // once the hint groups them by identifier so it stays readable instead
+  // of just naming one type ("CAF, CDR, IPDR, ... : phone number." rather
+  // than repeating "phone number" once per type).
+  const ID_HINT_TYPES = [
+    { flag: 'pfAddress', label: 'Address (SDR)', unit: 'phone number' },
+    { flag: 'pfCaf', label: 'CAF', unit: 'phone number' },
+    { flag: 'pfCdr', label: 'CDR', unit: 'phone number' },
+    { flag: 'pfIpdr', label: 'IPDR', unit: 'phone number' },
+    { flag: 'pfImeiTrace', label: 'IMEI Trace', unit: 'IMEI' },
+    { flag: 'pfCertified', label: 'Certified copy', unit: 'phone number' },
+    { flag: 'pfAadhaar', label: 'Aadhaar search', unit: 'Aadhaar number' },
+    { flag: 'pfSim', label: 'SIM number search', unit: 'SIM number' },
+  ];
   const idRowsHint = qs('#idRowsHint');
   function updateIdRowsHint() {
     if (!idRowsHint) return;
-    if (qs('#pfImeiTrace').checked) {
-      idRowsHint.textContent = 'One row per IMEI.';
-    } else if (qs('#pfCaf').checked || qs('#pfCdr').checked || qs('#pfIpdr').checked) {
-      idRowsHint.textContent = 'One row per phone number.';
-    } else {
+    const selected = ID_HINT_TYPES.filter((t) => qs('#' + t.flag).checked);
+    if (!selected.length) {
       idRowsHint.textContent = 'One row per number, IMEI, or Aadhaar number.';
+      return;
     }
+    const groups = [];
+    selected.forEach((t) => {
+      let g = groups.find((g2) => g2.unit === t.unit);
+      if (!g) { g = { unit: t.unit, labels: [] }; groups.push(g); }
+      g.labels.push(t.label);
+    });
+    idRowsHint.textContent = groups.map((g) => `${g.labels.join(', ')}: one row per ${g.unit}.`).join(' ');
   }
-  ['pfCaf', 'pfCdr', 'pfIpdr', 'pfImeiTrace'].forEach((id) => qs('#' + id).addEventListener('change', updateIdRowsHint));
+  ID_HINT_TYPES.forEach((t) => qs('#' + t.flag).addEventListener('change', updateIdRowsHint));
   updateIdRowsHint();
 
   // A required period longer than 6 months needs prior permission from the
