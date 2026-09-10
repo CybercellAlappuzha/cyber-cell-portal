@@ -1,10 +1,10 @@
 /**
- * Alappuzha district — police stations and DySP offices, grouped by
- * sub-division. Source: the District Police Chief, Alappuzha's own
- * "Administrative Office Sub Units" table
- * (alappuzha.keralapolice.gov.in), cross-checked against individual
- * station pages on ps.keralapolice.gov.in. Five sub-divisions, each
- * headed by a DySP office, cover the whole district.
+ * Alappuzha district — police stations, sub-divisional DySP offices, and
+ * district-level special-unit DySP offices. Sources: the District Police
+ * Chief, Alappuzha's own "Administrative Office Sub Units" table (for the
+ * 5 territorial sub-divisions and their stations) and the "Who is Who"
+ * listing (for the special units) on alappuzha.keralapolice.gov.in,
+ * cross-checked against individual station pages on ps.keralapolice.gov.in.
  *
  * Used to populate the Police Office / Police Station suggestion lists
  * in app.js — kept as one data file so it's easy to update if a new
@@ -71,11 +71,23 @@
     },
   ];
 
+  // District-level special units, each headed by its own DySP — not tied
+  // to a territorial sub-division, so they have no police stations under
+  // them and only ever appear in the Police Office list, never Police
+  // Station. Source: the "Who is Who" listing on
+  // alappuzha.keralapolice.gov.in.
+  const SPECIAL_UNITS = [
+    'DySP, Special Branch, Alappuzha',
+    'DySP, District Crime Branch, Alappuzha',
+    'DySP, District Crime Records Bureau (DCRB), Alappuzha',
+    'DySP, Narcotic Cell, Alappuzha',
+  ];
+
   const policeStations = SUB_DIVISIONS.flatMap((d) => d.stations).sort();
-  const dyspOffices = SUB_DIVISIONS.map((d) => d.dysp).sort();
-  // Police Office covers both a station and a DySP office; Police Station
-  // (in the Crime No./Sec./PS group) is stations only.
+  const dyspOffices = SUB_DIVISIONS.map((d) => d.dysp).concat(SPECIAL_UNITS).sort();
+  // Police Office covers both a station and a DySP/special-unit office;
+  // Police Station (in the Crime No./Sec./PS group) is stations only.
   const policeOffices = policeStations.concat(dyspOffices).sort();
 
-  window.ALAPPUZHA_POLICE = { SUB_DIVISIONS, policeStations, dyspOffices, policeOffices };
+  window.ALAPPUZHA_POLICE = { SUB_DIVISIONS, SPECIAL_UNITS, policeStations, dyspOffices, policeOffices };
 })();
