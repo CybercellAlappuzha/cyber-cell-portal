@@ -127,7 +127,6 @@
   const periodFields = qs('#periodFields');
   const imeiFromField = qs('#imeiFromField');
   const imeiRowsFieldset = qs('#imeiRowsFieldset');
-  const addressCheckbox = qs('#pfAddress');
 
   function syncConditionals() {
     periodFields.style.display = (qs('#pfCdr').checked || qs('#pfIpdr').checked) ? '' : 'none';
@@ -135,14 +134,10 @@
     imeiFromField.style.display = imeiOn ? '' : 'none';
     // The IMEI Trace box has its own Subscriber / user details section
     // (IMEIs, not phone numbers) — only shown once IMEI Trace is ticked.
+    // IMEI Trace is otherwise fully independent from "Required details" now
+    // (including Address) — each is its own separate request with its own
+    // rows, so ticking one no longer affects the other.
     imeiRowsFieldset.style.display = imeiOn ? '' : 'none';
-
-    // Address isn't applicable to an IMEI Trace request (an IMEI trace has no
-    // address of its own to attach — unlike CDR/CAF/Certified copy, which can
-    // carry Address along with them). While IMEI Trace is ticked, Address is
-    // forced off and disabled so it can't be accidentally requested alongside it.
-    addressCheckbox.disabled = imeiOn;
-    if (imeiOn && addressCheckbox.checked) addressCheckbox.checked = false;
   }
   ['pfCdr', 'pfIpdr', 'pfImeiTrace'].forEach((id) => qs('#' + id).addEventListener('change', syncConditionals));
   syncConditionals();
@@ -181,11 +176,6 @@
     idRowsHint.textContent = groups.map((g) => `${g.labels.join(', ')}: one row per ${g.unit}.`).join(' ');
   }
   ID_HINT_TYPES.forEach((t) => qs('#' + t.flag).addEventListener('change', updateIdRowsHint));
-  // IMEI Trace itself isn't in ID_HINT_TYPES (it has its own box/hint now),
-  // but ticking it force-unchecks Address via syncConditionals without
-  // firing Address's own 'change' event — so the hint still needs to
-  // refresh whenever IMEI Trace is toggled, or it goes stale.
-  qs('#pfImeiTrace').addEventListener('change', updateIdRowsHint);
   updateIdRowsHint();
 
   // A required period longer than 6 months needs prior permission from the
@@ -245,8 +235,6 @@
     const idData = idRowsGroup.collectRows();
     const imeiData = imeiRowsGroup.collectRows();
 
-    const imeiTraceChecked = checked('pfImeiTrace');
-
     // Police Office and Log Book No. are two separate fields in the form but
     // the PDF still prints them as one "Police Office & Log Book No." row,
     // same as the office's own paper template — joined back into pfOffice
@@ -294,9 +282,7 @@
       pfBrief: val('pfBrief'),
       pfRows: idData.text,
       pfImeiRows: imeiData.text,
-      // Address is never applicable to an IMEI Trace request — forced off here
-      // too, on top of the checkbox being disabled, as a defensive fallback.
-      pfAddress: imeiTraceChecked ? false : checked('pfAddress'),
+      pfAddress: checked('pfAddress'),
       pfCaf: checked('pfCaf'),
       pfCdr: checked('pfCdr'),
       pfIpdr: checked('pfIpdr'),
