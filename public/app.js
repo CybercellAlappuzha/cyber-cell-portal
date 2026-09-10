@@ -226,20 +226,19 @@
   function val(id) { return qs('#' + id).value.trim(); }
   function checked(id) { return qs('#' + id).checked; }
 
-  /** Standard IMEI check: 15 digits (spaces/hyphens ignored) with a valid Luhn check digit. */
+  /** IMEI format check: exactly 15 digits (spaces/hyphens ignored).
+   *
+   *  This deliberately does NOT enforce the GSMA Luhn check digit. A real
+   *  device's IMEI is normally Luhn-valid, but the numbers a station is
+   *  entering here often come from CDR/tower data on a suspect's device —
+   *  exactly the case where the IMEI can be reprogrammed, cloned, or
+   *  otherwise non-compliant (which is sometimes the reason it's suspicious
+   *  enough to trace in the first place). Rejecting a genuine 15-digit IMEI
+   *  because it fails a checksum would block real investigation data, so
+   *  only the digit count/format is enforced. */
   function isValidImei(raw) {
     const s = String(raw || '').replace(/[\s-]/g, '');
-    if (!/^\d{15}$/.test(s)) return false;
-    let sum = 0;
-    for (let i = 0; i < 15; i++) {
-      let d = Number(s[i]);
-      if (i % 2 === 1) {
-        d *= 2;
-        if (d > 9) d -= 9;
-      }
-      sum += d;
-    }
-    return sum % 10 === 0;
+    return /^\d{15}$/.test(s);
   }
 
   function collect() {
