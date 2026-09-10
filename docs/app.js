@@ -120,6 +120,24 @@
   ['pfCdr', 'pfIpdr', 'pfImeiTrace'].forEach((id) => qs('#' + id).addEventListener('change', syncConditionals));
   syncConditionals();
 
+  // The "Subscriber / user details" hint changes with what's ticked under
+  // "Required details", so a station knows exactly what to put in each row
+  // before they start filling them in: IMEI Trace wants IMEIs, CAF/CDR/IPDR
+  // want phone numbers, and anything else falls back to the general hint.
+  const idRowsHint = qs('#idRowsHint');
+  function updateIdRowsHint() {
+    if (!idRowsHint) return;
+    if (qs('#pfImeiTrace').checked) {
+      idRowsHint.textContent = 'One row per IMEI.';
+    } else if (qs('#pfCaf').checked || qs('#pfCdr').checked || qs('#pfIpdr').checked) {
+      idRowsHint.textContent = 'One row per phone number.';
+    } else {
+      idRowsHint.textContent = 'One row per number, IMEI, or Aadhaar number.';
+    }
+  }
+  ['pfCaf', 'pfCdr', 'pfIpdr', 'pfImeiTrace'].forEach((id) => qs('#' + id).addEventListener('change', updateIdRowsHint));
+  updateIdRowsHint();
+
   // A required period longer than 6 months needs prior permission from the
   // District Police Chief before the request can go to the Cyber Cell — flag
   // it live as soon as both dates of a period are filled in, for CDR/IPDR's
