@@ -207,6 +207,13 @@
     const crimePs = val('pfCrimePs');
     const pfCrime = [crimeNo, crimeSec].filter(Boolean).join(' ') + (crimePs ? `, ${crimePs}` : '');
 
+    // Investigating Officer's phone number is its own field but prints as
+    // part of the same "Details of Investigating Officer" line, same
+    // pattern as the other split-then-rejoined fields above.
+    const ioName = val('pfIo');
+    const ioPhone = val('pfIoPhone');
+    const pfIo = ioName + (ioPhone ? `, Mob: ${ioPhone}` : '');
+
     return {
       _numbers: numbers,
       pfPoliceOffice: policeOffice,
@@ -216,7 +223,9 @@
       pfCrimeSec: crimeSec,
       pfCrimePs: crimePs,
       pfCrime,
-      pfIo: val('pfIo'),
+      pfIoName: ioName,
+      pfIoPhone: ioPhone,
+      pfIo,
       pfOccur: val('pfOccur'),
       pfReport: val('pfReport'),
       pfComplainant: val('pfComplainant'),
@@ -249,7 +258,7 @@
     if (!v.pfCrimeNo) errors.push('Crime No. is required.');
     if (!v.pfCrimeSec) errors.push('Sec. of Law is required.');
     if (!v.pfCrimePs) errors.push('Police Station is required.');
-    if (!v.pfIo) errors.push('Investigating Officer — Name & Rank is required.');
+    if (!v.pfIoName) errors.push('Investigating Officer — Name & Rank is required.');
     if (!v.pfBrief) errors.push('Brief of the Case / Enquiry is required.');
     if (!v._rowCount) errors.push('At least one subscriber / identifier row is required.');
     const anyType = REQUEST_TYPES.some((t) => v[t.flag]);
