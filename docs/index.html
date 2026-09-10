@@ -95,13 +95,6 @@
     </fieldset>
 
     <fieldset>
-      <legend>Subscriber / user details <span class="req">*</span></legend>
-      <p class="hint">One row per number, IMEI, or Aadhaar number.</p>
-      <div id="idRows" class="rows-repeat"></div>
-      <div class="actions"><button type="button" class="secondary small" id="addRowBtn">+ Add row</button></div>
-    </fieldset>
-
-    <fieldset>
       <legend>Required details <span class="req">*</span></legend>
       <p class="hint">Tick everything that is being requested. Each one you tick produces its own separate PDF
         proforma — a station ticking CDR, IMEI Trace and Aadhaar search gets 3 separate PDFs to print and send.
@@ -146,6 +139,13 @@
       <div class="msg warn period-warn" id="cdrPeriodWarn" style="display:none">
         This required period is longer than 6 months. Prior permission from the District Police Chief must be obtained before this request can be sent to the Cyber Cell.
       </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Subscriber / user details <span class="req">*</span></legend>
+      <p class="hint">One row per number, IMEI, or Aadhaar number.</p>
+      <div id="idRows" class="rows-repeat"></div>
+      <div class="actions"><button type="button" class="secondary small" id="addRowBtn">+ Add row</button></div>
     </fieldset>
 
     <fieldset>
