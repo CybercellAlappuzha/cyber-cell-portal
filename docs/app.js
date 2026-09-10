@@ -82,33 +82,60 @@
     attachAutocomplete('pfCrimePs', 'pfCrimePsList', data.policeStations);
   })();
 
-  const idRows = qs('#idRows');
-
-  function addRow(number, nameAddr, reason) {
-    const div = document.createElement('div');
-    div.className = 'row-item';
-    div.innerHTML = `
-      <input class="id-number" placeholder="Mobile / IMEI / Aadhaar number" value="${esc(number || '')}">
-      <input class="id-name" placeholder="Name & address (if known)" value="${esc(nameAddr || '')}">
-      <input class="id-reason" placeholder="Reason / connection with the crime" value="${esc(reason || '')}">
-      <button type="button" class="secondary small remove-row">Remove</button>
-    `;
-    div.querySelector('.remove-row').addEventListener('click', () => {
-      if (idRows.children.length > 1) div.remove();
-    });
-    idRows.appendChild(div);
+  // Subscriber / user detail rows now come from two independent boxes: the
+  // general one (feeds Address/CAF/CDR/IPDR/Certified copy/Aadhaar/SIM) and
+  // a dedicated one for IMEI Trace, which has its own IMEIs rather than
+  // sharing the general box's phone numbers. Both use the same row markup
+  // and add/remove behaviour, so it's built once as a small factory.
+  function makeRowGroup(containerId, addBtnId, numberPlaceholder) {
+    const container = qs('#' + containerId);
+    function addRow(number, nameAddr, reason) {
+      const div = document.createElement('div');
+      div.className = 'row-item';
+      div.innerHTML = `
+        <input class="id-number" placeholder="${esc(numberPlaceholder)}" value="${esc(number || '')}">
+        <input class="id-name" placeholder="Name & address (if known)" value="${esc(nameAddr || '')}">
+        <input class="id-reason" placeholder="Reason / connection with the crime" value="${esc(reason || '')}">
+        <button type="button" class="secondary small remove-row">Remove</button>
+      `;
+      div.querySelector('.remove-row').addEventListener('click', () => {
+        if (container.children.length > 1) div.remove();
+      });
+      container.appendChild(div);
+    }
+    addRow();
+    qs('#' + addBtnId).addEventListener('click', () => addRow());
+    function collectRows() {
+      const numbers = [];
+      const rows = qsa('.row-item', container)
+        .map((row) => {
+          const number = row.querySelector('.id-number').value.trim();
+          const name = row.querySelector('.id-name').value.trim();
+          const reason = row.querySelector('.id-reason').value.trim();
+          if (number) numbers.push(number);
+          return number ? `${number} | ${name} | ${reason}` : '';
+        })
+        .filter(Boolean);
+      return { numbers, text: rows.join('\n'), count: rows.length };
+    }
+    return { addRow, collectRows };
   }
-  addRow();
-  qs('#addRowBtn').addEventListener('click', () => addRow());
+
+  const idRowsGroup = makeRowGroup('idRows', 'addRowBtn', 'Mobile / IMEI / Aadhaar number');
+  const imeiRowsGroup = makeRowGroup('imeiRows', 'addImeiRowBtn', 'IMEI number (15 digits)');
 
   const periodFields = qs('#periodFields');
   const imeiFromField = qs('#imeiFromField');
+  const imeiRowsFieldset = qs('#imeiRowsFieldset');
   const addressCheckbox = qs('#pfAddress');
 
   function syncConditionals() {
     periodFields.style.display = (qs('#pfCdr').checked || qs('#pfIpdr').checked) ? '' : 'none';
     const imeiOn = qs('#pfImeiTrace').checked;
     imeiFromField.style.display = imeiOn ? '' : 'none';
+    // The IMEI Trace box has its own Subscriber / user details section
+    // (IMEIs, not phone numbers) — only shown once IMEI Trace is ticked.
+    imeiRowsFieldset.style.display = imeiOn ? '' : 'none';
 
     // Address isn't applicable to an IMEI Trace request (an IMEI trace has no
     // address of its own to attach — unlike CDR/CAF/Certified copy, which can
@@ -126,13 +153,13 @@
   // to the kind of identifier it needs; when several types are ticked at
   // once the hint groups them by identifier so it stays readable instead
   // of just naming one type ("CAF, CDR, IPDR, ... : phone number." rather
-  // than repeating "phone number" once per type).
+  // than repeating "phone number" once per type). IMEI Trace isn't listed
+  // here — it has its own box and its own Subscriber / user details section.
   const ID_HINT_TYPES = [
     { flag: 'pfAddress', label: 'Address (SDR)', unit: 'phone number' },
     { flag: 'pfCaf', label: 'CAF', unit: 'phone number' },
     { flag: 'pfCdr', label: 'CDR', unit: 'phone number' },
     { flag: 'pfIpdr', label: 'IPDR', unit: 'phone number' },
-    { flag: 'pfImeiTrace', label: 'IMEI Trace', unit: 'IMEI' },
     { flag: 'pfCertified', label: 'Certified copy', unit: 'phone number' },
     { flag: 'pfAadhaar', label: 'Aadhaar search', unit: 'Aadhaar number' },
     { flag: 'pfSim', label: 'SIM number search', unit: 'SIM number' },
@@ -142,7 +169,7 @@
     if (!idRowsHint) return;
     const selected = ID_HINT_TYPES.filter((t) => qs('#' + t.flag).checked);
     if (!selected.length) {
-      idRowsHint.textContent = 'One row per number, IMEI, or Aadhaar number.';
+      idRowsHint.textContent = 'One row per number or Aadhaar number.';
       return;
     }
     const groups = [];
@@ -154,6 +181,11 @@
     idRowsHint.textContent = groups.map((g) => `${g.labels.join(', ')}: one row per ${g.unit}.`).join(' ');
   }
   ID_HINT_TYPES.forEach((t) => qs('#' + t.flag).addEventListener('change', updateIdRowsHint));
+  // IMEI Trace itself isn't in ID_HINT_TYPES (it has its own box/hint now),
+  // but ticking it force-unchecks Address via syncConditionals without
+  // firing Address's own 'change' event — so the hint still needs to
+  // refresh whenever IMEI Trace is toggled, or it goes stale.
+  qs('#pfImeiTrace').addEventListener('change', updateIdRowsHint);
   updateIdRowsHint();
 
   // A required period longer than 6 months needs prior permission from the
@@ -211,16 +243,8 @@
   }
 
   function collect() {
-    const numbers = [];
-    const rows = qsa('#idRows .row-item')
-      .map((row) => {
-        const number = row.querySelector('.id-number').value.trim();
-        const name = row.querySelector('.id-name').value.trim();
-        const reason = row.querySelector('.id-reason').value.trim();
-        if (number) numbers.push(number);
-        return number ? `${number} | ${name} | ${reason}` : '';
-      })
-      .filter(Boolean);
+    const idData = idRowsGroup.collectRows();
+    const imeiData = imeiRowsGroup.collectRows();
 
     const imeiTraceChecked = checked('pfImeiTrace');
 
@@ -251,7 +275,10 @@
     const pfIo = ioName + (ioPhone ? `, Mob: ${ioPhone}` : '');
 
     return {
-      _numbers: numbers,
+      _numbers: idData.numbers,
+      _rowCount: idData.count,
+      _imeiNumbers: imeiData.numbers,
+      _imeiRowCount: imeiData.count,
       pfPoliceOffice: policeOffice,
       pfLogBook: logBook,
       pfOffice,
@@ -266,7 +293,8 @@
       pfReport: val('pfReport'),
       pfComplainant: val('pfComplainant'),
       pfBrief: val('pfBrief'),
-      pfRows: rows.join('\n'),
+      pfRows: idData.text,
+      pfImeiRows: imeiData.text,
       // Address is never applicable to an IMEI Trace request — forced off here
       // too, on top of the checkbox being disabled, as a defensive fallback.
       pfAddress: imeiTraceChecked ? false : checked('pfAddress'),
@@ -283,7 +311,6 @@
       pfTo: val('pfTo'),
       pfJust: val('pfJust'),
       pfRemarks: val('pfRemarks'),
-      _rowCount: rows.length,
     };
   }
 
@@ -296,9 +323,15 @@
     if (!v.pfCrimePs) errors.push('Police Station is required.');
     if (!v.pfIoName) errors.push('Investigating Officer — Name & Rank is required.');
     if (!v.pfBrief) errors.push('Brief of the Case / Enquiry is required.');
-    if (!v._rowCount) errors.push('At least one subscriber / identifier row is required.');
+    // IMEI Trace's own subscriber rows are validated separately below — this
+    // only covers the general box, and only when something that uses it is
+    // actually ticked (IMEI Trace on its own doesn't need it filled in).
+    const nonImeiTicked = REQUEST_TYPES.some((t) => t.flag !== 'pfImeiTrace' && v[t.flag]);
+    if (nonImeiTicked && !v._rowCount) {
+      errors.push('At least one row is required in "Subscriber / user details" for the items ticked under Required details.');
+    }
     const anyType = REQUEST_TYPES.some((t) => v[t.flag]);
-    if (!anyType) errors.push('Tick at least one item under "Required details".');
+    if (!anyType) errors.push('Tick at least one item under "Required details" or "IMEI Trace".');
     if ((v.pfCdr || v.pfIpdr) && (!v.pfFrom || !v.pfTo)) {
       errors.push('Required period (from / to) is mandatory when CDR or IPDR is ticked.');
     }
@@ -307,9 +340,12 @@
     }
     if (!v.pfJust) errors.push('Justification of the Investigating Officer is required.');
     if (v.pfImeiTrace) {
-      const bad = (v._numbers || []).filter((n) => !isValidImei(n));
+      if (!v._imeiRowCount) {
+        errors.push('At least one row is required in "Subscriber / user details — IMEI Trace".');
+      }
+      const bad = (v._imeiNumbers || []).filter((n) => !isValidImei(n));
       if (bad.length) {
-        errors.push(`IMEI Trace is ticked, so every subscriber/identifier number must be a valid 15-digit IMEI: ${bad.join(', ')}`);
+        errors.push(`IMEI Trace is ticked, so every row in its Subscriber / user details must be a valid 15-digit IMEI: ${bad.join(', ')}`);
       }
       if (!v.pfImeiFrom || !v.pfImeiTo) {
         errors.push('IMEI trace period (from / to) is mandatory when IMEI Trace is ticked.');
@@ -419,6 +455,10 @@
         // single-purpose request even though the flags started out combined.
         const v1 = Object.assign({}, v);
         REQUEST_TYPES.forEach((rt) => { v1[rt.flag] = job.flags.includes(rt.flag); });
+        // IMEI Trace has its own Subscriber / user details box — swap in its
+        // IMEI rows so this PDF's subscriber table lists IMEIs, not the
+        // general box's phone numbers.
+        if (job.flags.includes('pfImeiTrace')) v1.pfRows = v.pfImeiRows;
         const doc = window.PFPDF.renderProforma(v1);
         const filename = `Proforma_${job.tag}_${crimeTag}_${dateStr}.pdf`;
         doc.save(filename);

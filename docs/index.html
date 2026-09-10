@@ -97,33 +97,18 @@
     <fieldset>
       <legend>Required details <span class="req">*</span></legend>
       <p class="hint">Tick everything that is being requested. Each one you tick produces its own separate PDF
-        proforma — a station ticking CDR, IMEI Trace and Aadhaar search gets 3 separate PDFs to print and send.
+        proforma — a station ticking CDR and Aadhaar search gets 2 separate PDFs to print and send, plus a 3rd
+        if IMEI Trace is also ticked in its own box below.
         Address is the exception: tick it alongside CDR, CAF, or Certified copy and it merges into that PDF
-        instead of making a separate one — it only gets its own PDF when none of those three are ticked.
-        Address doesn't apply to IMEI Trace, so it's turned off and disabled while IMEI Trace is ticked.</p>
+        instead of making a separate one — it only gets its own PDF when none of those three are ticked.</p>
       <div class="check-grid" style="margin-bottom:12px">
         <label class="check-row"><input type="checkbox" id="pfAddress" checked> Address (SDR)</label>
         <label class="check-row"><input type="checkbox" id="pfCaf"> CAF</label>
         <label class="check-row"><input type="checkbox" id="pfCdr"> CDR</label>
         <label class="check-row"><input type="checkbox" id="pfIpdr"> IPDR</label>
-        <label class="check-row"><input type="checkbox" id="pfImeiTrace"> IMEI Trace</label>
         <label class="check-row"><input type="checkbox" id="pfCertified"> Certified copy</label>
         <label class="check-row"><input type="checkbox" id="pfAadhaar"> Aadhaar search</label>
         <label class="check-row"><input type="checkbox" id="pfSim"> SIM number search</label>
-      </div>
-
-      <div class="grid" id="imeiFromField" style="display:none; margin-bottom:10px">
-        <div class="field">
-          <label for="pfImeiFrom">IMEI trace period — from <span class="req">*</span></label>
-          <input type="date" id="pfImeiFrom">
-        </div>
-        <div class="field">
-          <label for="pfImeiTo">IMEI trace period — to <span class="req">*</span></label>
-          <input type="date" id="pfImeiTo">
-        </div>
-      </div>
-      <div class="msg warn period-warn" id="imeiPeriodWarn" style="display:none">
-        This IMEI trace period is longer than 6 months. Prior permission from the District Police Chief must be obtained before this request can be sent to the Cyber Cell.
       </div>
 
       <div class="grid" id="periodFields" style="display:none">
@@ -143,9 +128,37 @@
 
     <fieldset>
       <legend>Subscriber / user details <span class="req">*</span></legend>
-      <p class="hint" id="idRowsHint">One row per number, IMEI, or Aadhaar number.</p>
+      <p class="hint" id="idRowsHint">One row per number or Aadhaar number.</p>
       <div id="idRows" class="rows-repeat"></div>
       <div class="actions"><button type="button" class="secondary small" id="addRowBtn">+ Add row</button></div>
+    </fieldset>
+
+    <fieldset>
+      <legend>IMEI Trace</legend>
+      <p class="hint">Requested separately from the items above, with its own Subscriber / user details box below
+        for IMEIs. Address doesn't apply to an IMEI trace, so ticking this turns off and disables Address above.</p>
+      <label class="check-row"><input type="checkbox" id="pfImeiTrace"> Request IMEI Trace</label>
+
+      <div class="grid" id="imeiFromField" style="display:none; margin-top:10px">
+        <div class="field">
+          <label for="pfImeiFrom">IMEI trace period — from <span class="req">*</span></label>
+          <input type="date" id="pfImeiFrom">
+        </div>
+        <div class="field">
+          <label for="pfImeiTo">IMEI trace period — to <span class="req">*</span></label>
+          <input type="date" id="pfImeiTo">
+        </div>
+      </div>
+      <div class="msg warn period-warn" id="imeiPeriodWarn" style="display:none; margin-top:10px">
+        This IMEI trace period is longer than 6 months. Prior permission from the District Police Chief must be obtained before this request can be sent to the Cyber Cell.
+      </div>
+    </fieldset>
+
+    <fieldset id="imeiRowsFieldset" style="display:none">
+      <legend>Subscriber / user details — IMEI Trace <span class="req">*</span></legend>
+      <p class="hint">One row per IMEI.</p>
+      <div id="imeiRows" class="rows-repeat"></div>
+      <div class="actions"><button type="button" class="secondary small" id="addImeiRowBtn">+ Add row</button></div>
     </fieldset>
 
     <fieldset>
