@@ -396,7 +396,7 @@
     cur.y += 9;
 
     // Verified-by / Recommended-by signature table — left blank in the body
-    // row so the ISHO and SDPO sign and seal it by hand after printing,
+    // row so the SHO and SDPO sign and seal it by hand after printing,
     // exactly as in the office's own "New <TYPE> performa.doc" templates.
     const sigRowH = 30;
     cur.room(14 + sigRowH);
@@ -404,7 +404,7 @@
       startY: cur.y,
       margin: { left: MM.L, right: MM.R },
       body: [
-        ['Verified by : Name & Signature of ISHO\nwith office seal and Date', 'Recommended by : Name & Signature of SDPO\nwith office seal and Date'],
+        ['Verified by : Name & Signature of SHO\nwith office seal and Date', 'Recommended by : Name & Signature of SDPO\nwith office seal and Date'],
         ['', ''],
       ],
       styles: { font: 'times', fontSize: 10, lineColor: 20, lineWidth: 0.2, cellPadding: 2, valign: 'top' },
