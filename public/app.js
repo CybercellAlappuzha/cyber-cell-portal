@@ -7,6 +7,23 @@
     }[c]));
   }
 
+  // Police Office / Police Station suggestion lists — Alappuzha district
+  // police stations and DySP offices, from public/police-stations.js.
+  // Police Office offers stations + DySP offices; Police Station (in the
+  // Crime No./Sec./PS group) offers stations only. Left empty (no
+  // suggestions, not an error) if that data file failed to load.
+  (function populatePoliceDatalists() {
+    const data = window.ALAPPUZHA_POLICE;
+    if (!data) return;
+    const fill = (listId, names) => {
+      const list = qs('#' + listId);
+      if (!list) return;
+      list.innerHTML = names.map((n) => `<option value="${esc(n)}"></option>`).join('');
+    };
+    fill('policeOfficeList', data.policeOffices);
+    fill('policeStationList', data.policeStations);
+  })();
+
   const idRows = qs('#idRows');
 
   function addRow(number, nameAddr, reason) {

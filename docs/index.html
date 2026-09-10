@@ -29,14 +29,14 @@
       <legend>Case particulars</legend>
       <div class="grid">
         <div class="field w2">
-          <label>Police Office &amp; Log Book No. <span class="req">*</span></label>
           <div class="grid2">
             <div class="field">
-              <label for="pfPoliceOffice">Police Office</label>
-              <input type="text" id="pfPoliceOffice">
+              <label for="pfPoliceOffice">Police Office <span class="req">*</span></label>
+              <input type="text" id="pfPoliceOffice" list="policeOfficeList" autocomplete="off">
+              <datalist id="policeOfficeList"></datalist>
             </div>
             <div class="field">
-              <label for="pfLogBook">Log Book No.</label>
+              <label for="pfLogBook">Log Book No. <span class="req">*</span></label>
               <input type="text" id="pfLogBook">
             </div>
           </div>
@@ -54,7 +54,8 @@
             </div>
             <div class="field">
               <label for="pfCrimePs">Police Station</label>
-              <input type="text" id="pfCrimePs">
+              <input type="text" id="pfCrimePs" list="policeStationList" autocomplete="off">
+              <datalist id="policeStationList"></datalist>
             </div>
           </div>
         </div>
@@ -165,6 +166,7 @@
 <script src="vendor/jspdf.umd.min.js"></script>
 <script src="vendor/jspdf.plugin.autotable.min.js"></script>
 <script src="pdf-render.js"></script>
+<script src="police-stations.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
