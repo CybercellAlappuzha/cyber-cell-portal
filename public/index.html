@@ -32,8 +32,10 @@
           <div class="grid2">
             <div class="field">
               <label for="pfPoliceOffice">Police Office <span class="req">*</span></label>
-              <input type="text" id="pfPoliceOffice" list="policeOfficeList" autocomplete="off">
-              <datalist id="policeOfficeList"></datalist>
+              <div class="ac-wrap">
+                <input type="text" id="pfPoliceOffice" autocomplete="off">
+                <div class="ac-list" id="pfPoliceOfficeList" hidden></div>
+              </div>
             </div>
             <div class="field">
               <label for="pfLogBook">Log Book No. <span class="req">*</span></label>
@@ -54,8 +56,10 @@
             </div>
             <div class="field">
               <label for="pfCrimePs">Police Station</label>
-              <input type="text" id="pfCrimePs" list="policeStationList" autocomplete="off">
-              <datalist id="policeStationList"></datalist>
+              <div class="ac-wrap">
+                <input type="text" id="pfCrimePs" autocomplete="off">
+                <div class="ac-list" id="pfCrimePsList" hidden></div>
+              </div>
             </div>
           </div>
         </div>

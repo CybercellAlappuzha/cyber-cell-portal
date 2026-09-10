@@ -7,21 +7,79 @@
     }[c]));
   }
 
-  // Police Office / Police Station suggestion lists — Alappuzha district
-  // police stations and DySP offices, from public/police-stations.js.
-  // Police Office offers stations + DySP offices; Police Station (in the
-  // Crime No./Sec./PS group) offers stations only. Left empty (no
-  // suggestions, not an error) if that data file failed to load.
-  (function populatePoliceDatalists() {
+  // Police Office / Police Station suggestion dropdowns — Alappuzha
+  // district police stations and DySP offices, from
+  // public/police-stations.js. Built by hand in JS rather than a native
+  // <datalist>, because a <datalist>'s suggestion popup doesn't show at
+  // all in some browsers (Safari in particular has no visible dropdown
+  // for it), which is exactly the "no suggestion dropdown shows" report
+  // this replaced. Police Office offers stations + DySP offices; Police
+  // Station (in the Crime No./Sec./PS group) offers stations only. Free
+  // text is still accepted — nothing here blocks typing a value that
+  // isn't in the list, for a station that's new or renamed.
+  function attachAutocomplete(inputId, listId, options) {
+    const input = qs('#' + inputId);
+    const list = qs('#' + listId);
+    if (!input || !list) return;
+    let activeIndex = -1;
+    let shown = [];
+
+    function render(filterText) {
+      const q = (filterText || '').trim().toLowerCase();
+      shown = q ? options.filter((o) => o.toLowerCase().includes(q)) : options;
+      activeIndex = -1;
+      if (!shown.length) {
+        list.innerHTML = '<div class="ac-empty">No match — you can still type any name</div>';
+      } else {
+        list.innerHTML = shown.map((o, i) => `<div class="ac-opt" data-i="${i}">${esc(o)}</div>`).join('');
+      }
+      list.hidden = false;
+    }
+
+    function hide() { list.hidden = true; activeIndex = -1; }
+
+    function choose(i) {
+      if (shown[i] == null) return;
+      input.value = shown[i];
+      hide();
+      input.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+
+    function setActive(i) {
+      qsa('.ac-opt', list).forEach((el) => el.classList.remove('active'));
+      if (i >= 0 && shown[i] != null) {
+        activeIndex = i;
+        const el = list.querySelector(`.ac-opt[data-i="${i}"]`);
+        if (el) { el.classList.add('active'); el.scrollIntoView({ block: 'nearest' }); }
+      }
+    }
+
+    input.addEventListener('focus', () => render(input.value));
+    input.addEventListener('click', () => render(input.value));
+    input.addEventListener('input', () => render(input.value));
+    input.addEventListener('keydown', (e) => {
+      if (list.hidden && (e.key === 'ArrowDown' || e.key === 'ArrowUp')) { render(input.value); return; }
+      if (e.key === 'ArrowDown') { e.preventDefault(); setActive(Math.min(activeIndex + 1, shown.length - 1)); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); setActive(Math.max(activeIndex - 1, 0)); }
+      else if (e.key === 'Enter') { if (activeIndex >= 0) { e.preventDefault(); choose(activeIndex); } }
+      else if (e.key === 'Escape') { hide(); }
+    });
+    list.addEventListener('mousedown', (e) => {
+      // mousedown (not click) fires before the input's blur, so the
+      // option is still in the DOM to read when choosing it.
+      const opt = e.target.closest('.ac-opt');
+      if (opt) choose(Number(opt.dataset.i));
+    });
+    document.addEventListener('click', (e) => {
+      if (e.target !== input && !list.contains(e.target)) hide();
+    });
+  }
+
+  (function setupPoliceAutocomplete() {
     const data = window.ALAPPUZHA_POLICE;
     if (!data) return;
-    const fill = (listId, names) => {
-      const list = qs('#' + listId);
-      if (!list) return;
-      list.innerHTML = names.map((n) => `<option value="${esc(n)}"></option>`).join('');
-    };
-    fill('policeOfficeList', data.policeOffices);
-    fill('policeStationList', data.policeStations);
+    attachAutocomplete('pfPoliceOffice', 'pfPoliceOfficeList', data.policeOffices);
+    attachAutocomplete('pfCrimePs', 'pfCrimePsList', data.policeStations);
   })();
 
   const idRows = qs('#idRows');
