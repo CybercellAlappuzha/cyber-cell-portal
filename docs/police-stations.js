@@ -83,10 +83,19 @@
     'DySP, Narcotic Cell, Alappuzha',
   ];
 
-  const policeStations = SUB_DIVISIONS.flatMap((d) => d.stations).sort();
+  // District-level police stations that aren't part of a territorial
+  // sub-division either (unlike the special units above, these ARE
+  // police stations, so they belong in both the Police Office and
+  // Police Station lists).
+  const OTHER_STATIONS = [
+    'Cyber Crime Police Station',
+  ];
+
+  const policeStations = SUB_DIVISIONS.flatMap((d) => d.stations).concat(OTHER_STATIONS).sort();
   const dyspOffices = SUB_DIVISIONS.map((d) => d.dysp).concat(SPECIAL_UNITS).sort();
-  // Police Office covers both a station and a DySP/special-unit office;
-  // Police Station (in the Crime No./Sec./PS group) is stations only.
+  // Police Office covers stations, DySP/special-unit offices, and the
+  // other stations above; Police Station (in the Crime No./Sec./PS
+  // group) is all stations, sub-divisional or not.
   const policeOffices = policeStations.concat(dyspOffices).sort();
 
   window.ALAPPUZHA_POLICE = { SUB_DIVISIONS, SPECIAL_UNITS, policeStations, dyspOffices, policeOffices };
