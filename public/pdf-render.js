@@ -217,6 +217,12 @@
       doc.setTextColor(110);
       doc.text('Confidential — for official use only', MM.L, A4.h - 7);
       if (n > 1) doc.text(`Page ${i} of ${n}`, A4.w - MM.R, A4.h - 7, { align: 'right' });
+      // Subtle attribution watermark, centered right at the bottom edge —
+      // faint and small so it never competes with the printed proforma.
+      doc.setFont('times', 'normal');
+      doc.setFontSize(7);
+      doc.setTextColor(190);
+      doc.text('alappuzhacybercell', A4.w / 2, A4.h - 3, { align: 'center' });
       doc.setTextColor(0);
     }
   }

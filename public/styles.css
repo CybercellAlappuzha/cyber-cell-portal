@@ -34,6 +34,16 @@ header.top {
 }
 header.top h1 { font-size: 17px; margin: 0; font-weight: 600; }
 header.top .sub { font-size: 12.5px; opacity: .85; }
+/* Subtle attribution watermark — pushed to the far right of the header bar,
+   small and low-opacity so it reads as a quiet tag rather than a logo. */
+header.top .watermark-tag {
+  margin-left: auto;
+  font-size: 10.5px;
+  letter-spacing: .5px;
+  text-transform: uppercase;
+  opacity: .4;
+  white-space: nowrap;
+}
 
 .wrap { max-width: 900px; margin: 0 auto; padding: 20px 18px 84px; }
 
