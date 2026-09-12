@@ -271,7 +271,14 @@
 
     const sel = selection(v);
     const label = `Details of subscriber / actual user whose ${sel.length ? sel.join(' / ') : 'CDR / CAF'} is required`;
-    const idCol = v.pfAadhaar || v.pfSim ? 'Mobile / IMEI / Aadhaar Number' : 'Mobile / IMEI Number';
+    // Each PDF is generated for one specific type (Address only ever rides
+    // along with CDR/CAF/Certified copy, all of which use a phone number
+    // too), so the column can name the exact identifier this PDF actually
+    // needs instead of a generic "could be any of these" label.
+    let idCol = 'Mobile Number';
+    if (v.pfAadhaar) idCol = 'Aadhaar Number';
+    else if (v.pfSim) idCol = 'SIM Number';
+    else if (v.pfImeiTrace) idCol = 'IMEI Number';
     const sw = (CW - L1) / 3;
     const subjStart = doc.lastAutoTable.finalY;
 
