@@ -231,6 +231,13 @@
     return /^\d{15}$/.test(s);
   }
 
+  /** Aadhaar format check: exactly 12 digits (spaces/hyphens ignored, since
+   *  Aadhaar numbers are commonly written/printed as "XXXX XXXX XXXX"). */
+  function isValidAadhaar(raw) {
+    const s = String(raw || '').replace(/[\s-]/g, '');
+    return /^\d{12}$/.test(s);
+  }
+
   function collect() {
     const idData = idRowsGroup.collectRows();
     const imeiData = imeiRowsGroup.collectRows();
@@ -324,6 +331,12 @@
       errors.push('Required period: "from" date must not be after "to" date.');
     }
     if (!v.pfJust) errors.push('Justification of the Investigating Officer is required.');
+    if (v.pfAadhaar) {
+      const bad = (v._numbers || []).filter((n) => !isValidAadhaar(n));
+      if (bad.length) {
+        errors.push(`Aadhaar search is ticked, so every row in "Subscriber / user details" must be a valid 12-digit Aadhaar number: ${bad.join(', ')}`);
+      }
+    }
     if (v.pfImeiTrace) {
       if (!v._imeiRowCount) {
         errors.push('At least one row is required in "Subscriber / user details — IMEI Trace".');
