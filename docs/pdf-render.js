@@ -433,5 +433,8 @@
     return doc;
   }
 
-  window.PFPDF = { renderProforma, fmtDate };
+  // MM/A4/CW/makeDoc/Cursor/footer are exported too so bns94-render.js (a
+  // different letter-style proforma, not the tabular one above) can reuse
+  // the same page geometry and helpers instead of redefining them.
+  window.PFPDF = { renderProforma, fmtDate, makeDoc, Cursor, footer, MM, A4, CW };
 })();

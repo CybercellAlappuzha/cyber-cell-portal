@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:,">
+<title>Section 94 BNSS Request</title>
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<header class="top">
+  <h1>Section 94 BNSS Request</h1>
+  <span class="sub">Notice to a social media / email / messaging platform — fill in, generate the PDF, print and send</span>
+  <span class="watermark-tag">alappuzhacybercell</span>
+</header>
+<div class="wrap">
+
+  <div class="card">
+    <p class="hint" style="margin:0">
+      Nothing you enter here is saved or sent anywhere — the PDF is created in your own browser.
+      This is a separate request type from the main CDR / CAF / IMEI / Aadhaar proforma —
+      <a href="/index.html">go there instead</a> for those.
+    </p>
+  </div>
+
+  <form id="b94Form" novalidate>
+    <div id="formMsg"></div>
+
+    <fieldset>
+      <legend>Platform</legend>
+      <div class="field">
+        <label for="b94Platform">Platform the request is addressed to <span class="req">*</span></label>
+        <select id="b94Platform"></select>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Case particulars</legend>
+      <div class="grid">
+        <div class="field">
+          <label for="b94Ps">Police Station <span class="req">*</span></label>
+          <div class="ac-wrap">
+            <input type="text" id="b94Ps" autocomplete="off">
+            <div class="ac-list" id="b94PsList" hidden></div>
+          </div>
+        </div>
+        <div class="field">
+          <label for="b94LetterNo">Letter No. <span class="req">*</span></label>
+          <input type="text" id="b94LetterNo" placeholder="1234/2026-Alpy">
+        </div>
+        <div class="field">
+          <label for="b94Pin">Pin</label>
+          <input type="text" id="b94Pin" placeholder="688xxx">
+        </div>
+        <div class="field">
+          <label for="b94Phone">Phone Office</label>
+          <input type="text" id="b94Phone">
+        </div>
+        <div class="field">
+          <label for="b94Date">Date <span class="req">*</span></label>
+          <input type="date" id="b94Date">
+        </div>
+        <div class="field">
+          <label for="b94CrimeNo">Crime No. <span class="req">*</span></label>
+          <input type="text" id="b94CrimeNo" placeholder="123/2026">
+        </div>
+        <div class="field w2">
+          <label for="b94Sections">Sections of Law <span class="req">*</span></label>
+          <input type="text" id="b94Sections" placeholder="u/s xxx BNS &amp; xxx of IT Act">
+        </div>
+        <div class="field w2">
+          <label for="b94Brief">Brief of the case <span class="req">*</span></label>
+          <textarea id="b94Brief" rows="3" placeholder="Brief history of the case, and how the account/profile below is connected with the crime."></textarea>
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Account / profile identifier</legend>
+      <p class="hint" id="b94IdsLabel">Identifier *</p>
+      <textarea id="b94Ids" rows="2"></textarea>
+    </fieldset>
+
+    <fieldset>
+      <legend>Records period</legend>
+      <p class="hint">Used to fill in the "login IP for the period from … to …" line(s) below. Leave blank to print a blank line instead.</p>
+      <div class="grid">
+        <div class="field">
+          <label for="b94From">From</label>
+          <input type="date" id="b94From">
+        </div>
+        <div class="field">
+          <label for="b94To">To</label>
+          <input type="date" id="b94To">
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Requested details <span class="req">*</span></legend>
+      <p class="hint">One item per line — numbered automatically on the printed letter. Pre-filled for the selected platform; edit as needed.</p>
+      <textarea id="b94Items" rows="6"></textarea>
+    </fieldset>
+
+    <fieldset>
+      <legend>Recipient</legend>
+      <div class="field">
+        <label for="b94Recipient">Company name &amp; address ("To,") <span class="req">*</span></label>
+        <textarea id="b94Recipient" rows="4"></textarea>
+      </div>
+      <div class="field">
+        <label for="b94ReplyEmail">Reply to email (optional)</label>
+        <input type="text" id="b94ReplyEmail" placeholder="spalpy.pol@kerala.gov.in">
+      </div>
+    </fieldset>
+
+    <div class="actions">
+      <button type="submit" id="genBtn">Generate PDF</button>
+    </div>
+  </form>
+</div>
+
+<script src="/vendor/jspdf.umd.min.js"></script>
+<script src="/vendor/jspdf.plugin.autotable.min.js"></script>
+<script src="/pdf-render.js"></script>
+<script src="/bns94-render.js"></script>
+<script src="/police-stations.js"></script>
+<script src="/bns94.js"></script>
+</body>
+</html>
