@@ -1,5 +1,6 @@
 (function () {
   function qs(sel, root) { return (root || document).querySelector(sel); }
+  function qsa(sel, root) { return Array.from((root || document).querySelectorAll(sel)); }
   function esc(s) {
     return String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({
       '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
@@ -39,6 +40,39 @@
   if (window.ALAPPUZHA_POLICE) {
     attachAutocomplete('b94Ps', 'b94PsList', window.ALAPPUZHA_POLICE.policeStations);
   }
+
+  // Facebook/Instagram/Telegram sometimes need more than one profile in the
+  // same request — a repeatable name+link row, same add/remove pattern as
+  // the main proforma page's Subscriber / user details rows.
+  function makeProfileRowGroup(containerId, addBtnId) {
+    const container = qs('#' + containerId);
+    function addRow(name, link, namePh, linkPh) {
+      const div = document.createElement('div');
+      div.className = 'row-item row-item-2';
+      div.innerHTML = `
+        <input class="prof-name" placeholder="${esc(namePh || 'Profile name')}" value="${esc(name || '')}">
+        <input class="prof-link" placeholder="${esc(linkPh || 'Link')}" value="${esc(link || '')}">
+        <button type="button" class="secondary small remove-row">Remove</button>
+      `;
+      div.querySelector('.remove-row').addEventListener('click', () => {
+        if (container.children.length > 1) div.remove();
+      });
+      container.appendChild(div);
+    }
+    addRow();
+    qs('#' + addBtnId).addEventListener('click', () => addRow());
+    function collectRows() {
+      return qsa('.row-item', container)
+        .map((row) => ({ name: row.querySelector('.prof-name').value.trim(), link: row.querySelector('.prof-link').value.trim() }))
+        .filter((r) => r.name || r.link);
+    }
+    function setPlaceholders(namePh, linkPh) {
+      qsa('.prof-name', container).forEach((el) => { el.placeholder = namePh; });
+      qsa('.prof-link', container).forEach((el) => { el.placeholder = linkPh; });
+    }
+    return { addRow, collectRows, setPlaceholders };
+  }
+  const profileRows = makeProfileRowGroup('b94ProfileRows', 'addProfileRowBtn');
 
   // One preset per platform: the recipient's address, the intro line above
   // the identifier block, and the default requested-details list (each
@@ -165,8 +199,7 @@
     idsTwoBox.style.display = twoBox ? '' : 'none';
     idsOneBox.style.display = twoBox ? 'none' : '';
     if (twoBox) {
-      qs('#b94ProfileName').placeholder = p.namePlaceholder;
-      qs('#b94ProfileLink').placeholder = p.linkPlaceholder;
+      profileRows.setPlaceholders(p.namePlaceholder, p.linkPlaceholder);
     } else {
       qs('#b94IdsLabel').textContent = p.idLabel + ' *';
       qs('#b94Ids').placeholder = p.idPlaceholder;
@@ -180,11 +213,23 @@
 
   function val(id) { return qs('#' + id).value.trim(); }
 
+  // A single profile prints exactly like before ("Profile name :- X" /
+  // "Link: Y"); once there's more than one row, each is numbered so it's
+  // clear which name goes with which link on the printed letter.
+  function formatProfileRows(rows) {
+    if (rows.length <= 1) {
+      const r = rows[0] || { name: '', link: '' };
+      return [r.name && `Profile name :- ${r.name}`, r.link && `Link: ${r.link}`].filter(Boolean).join('\n');
+    }
+    return rows
+      .map((r, i) => [r.name && `Profile ${i + 1} name :- ${r.name}`, r.link && `Profile ${i + 1} link: ${r.link}`].filter(Boolean).join('\n'))
+      .join('\n');
+  }
+
   function collect() {
     const p = PLATFORMS[platformSel.value];
     const twoBox = !!p.namePlaceholder;
-    const profileName = val('b94ProfileName');
-    const profileLink = val('b94ProfileLink');
+    const rows = twoBox ? profileRows.collectRows() : [];
     return {
       platformLabel: p.label,
       b94Intro: p.intro,
@@ -196,11 +241,8 @@
       b94CrimeNo: val('b94CrimeNo'),
       b94Sections: val('b94Sections'),
       b94Brief: val('b94Brief'),
-      b94ProfileName: profileName,
-      b94ProfileLink: profileLink,
-      b94Ids: twoBox
-        ? [profileName && `Profile name :- ${profileName}`, profileLink && `Link: ${profileLink}`].filter(Boolean).join('\n')
-        : val('b94Ids'),
+      _profileRows: rows,
+      b94Ids: twoBox ? formatProfileRows(rows) : val('b94Ids'),
       b94From: val('b94From'),
       b94To: val('b94To'),
       b94Items: val('b94Items'),
@@ -219,8 +261,9 @@
     if (!v.b94Sections) errors.push('Sec. of Law is required.');
     if (!v.b94Brief) errors.push('Brief of the case is required.');
     if (p.namePlaceholder) {
-      if (!v.b94ProfileName) errors.push('Profile name is required.');
-      if (!v.b94ProfileLink) errors.push('Link is required.');
+      if (!v._profileRows.length) errors.push('At least one profile name & link row is required.');
+      const incomplete = v._profileRows.some((r) => !r.name || !r.link);
+      if (incomplete) errors.push('Every profile row needs both a name and a link.');
     } else if (!v.b94Ids) {
       errors.push(`${p.idLabel} is required.`);
     }

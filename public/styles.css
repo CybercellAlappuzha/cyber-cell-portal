@@ -136,3 +136,6 @@ button:disabled { opacity: .55; cursor: not-allowed; }
 .rows-repeat .row-item { display: grid; grid-template-columns: 1fr 1fr 1.4fr auto; gap: 8px; }
 @media (max-width: 700px) { .rows-repeat .row-item { grid-template-columns: 1fr; } }
 .rows-repeat .row-item input { font-size: 13.5px; }
+/* Two-field variant (e.g. profile name + link) — no reason/name column. */
+.rows-repeat .row-item-2 { grid-template-columns: 1fr 1.6fr auto; }
+@media (max-width: 700px) { .rows-repeat .row-item-2 { grid-template-columns: 1fr; } }

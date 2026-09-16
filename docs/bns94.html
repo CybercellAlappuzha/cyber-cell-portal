@@ -76,16 +76,11 @@
     </fieldset>
 
     <fieldset>
-      <legend>Account / profile identifier</legend>
-      <div class="grid" id="b94IdsTwoBox">
-        <div class="field">
-          <label for="b94ProfileName">Profile name <span class="req">*</span></label>
-          <input type="text" id="b94ProfileName">
-        </div>
-        <div class="field">
-          <label for="b94ProfileLink">Link <span class="req">*</span></label>
-          <input type="text" id="b94ProfileLink">
-        </div>
+      <legend>Account / profile identifier <span class="req">*</span></legend>
+      <div id="b94IdsTwoBox">
+        <p class="hint">One row per profile — add more if the request covers several accounts.</p>
+        <div id="b94ProfileRows" class="rows-repeat"></div>
+        <div class="actions"><button type="button" class="secondary small" id="addProfileRowBtn">+ Add row</button></div>
       </div>
       <div id="b94IdsOneBox">
         <p class="hint" id="b94IdsLabel">Identifier *</p>
