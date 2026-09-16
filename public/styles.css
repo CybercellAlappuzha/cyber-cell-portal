@@ -85,6 +85,18 @@ textarea { resize: vertical; min-height: 56px; }
 input:focus, select:focus, textarea:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
 .field { margin-bottom: 2px; }
 
+/* Records-period "From … to …" merged into one visual box — each side is
+   still its own native <input type=date>, so clicking either half opens
+   that browser's own date-picker calendar for just that date. */
+.period-box {
+  display: flex; align-items: center; gap: 8px;
+  border: 1px solid var(--line); border-radius: 6px; background: #fff; padding: 0 10px;
+}
+.period-box input[type=date] { border: none; padding: 8px 0; width: auto; flex: 1; min-width: 0; }
+.period-box input[type=date]:focus { outline: none; }
+.period-box .period-sep { color: var(--muted); font-size: 13px; flex: none; }
+@media (max-width: 420px) { .period-box { flex-wrap: wrap; } }
+
 /* Custom suggestion dropdown (Police Office / Police Station) — built in
    JS instead of a native <datalist>, since datalist's suggestion popup is
    invisible/inconsistent in several browsers (notably Safari). Free text

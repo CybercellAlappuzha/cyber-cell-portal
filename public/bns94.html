@@ -95,15 +95,13 @@
 
     <fieldset>
       <legend>Records period</legend>
-      <p class="hint">Used to fill in the "login IP for the period from … to …" line(s) below. Leave blank to print a blank line instead.</p>
-      <div class="grid">
-        <div class="field">
-          <label for="b94From">From</label>
-          <input type="date" id="b94From">
-        </div>
-        <div class="field">
-          <label for="b94To">To</label>
-          <input type="date" id="b94To">
+      <p class="hint">Used to fill in the "login IP for the period from … to …" line(s) below. Leave blank to print a blank line instead. Click either side to pick its date from the calendar.</p>
+      <div class="field">
+        <label for="b94From">Period</label>
+        <div class="period-box">
+          <input type="date" id="b94From" aria-label="From">
+          <span class="period-sep">to</span>
+          <input type="date" id="b94To" aria-label="To">
         </div>
       </div>
     </fieldset>
