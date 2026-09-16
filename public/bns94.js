@@ -48,8 +48,8 @@
   const PLATFORMS = {
     facebook: {
       label: 'Facebook',
-      idLabel: 'Profile name & link',
-      idPlaceholder: 'Profile name: XXXXXXXXXX\nLink: https://www.facebook.com/XXXXXXXXX/',
+      namePlaceholder: 'XXXXXXXXXX',
+      linkPlaceholder: 'https://www.facebook.com/XXXXXXXXX/',
       intro: 'The profile name and link to the Facebook profile is:-',
       to: 'Meta Platforms, Inc.\n1 Meta Way,\nMenlo Park, CA 94025',
       items: [
@@ -62,8 +62,8 @@
     },
     instagram: {
       label: 'Instagram',
-      idLabel: 'Profile name & link',
-      idPlaceholder: 'Profile name: XXXXXXXXXX\nLink: https://www.instagram.com/XXXXXXXXXX',
+      namePlaceholder: 'XXXXXXXXXX',
+      linkPlaceholder: 'https://www.instagram.com/XXXXXXXXXX',
       intro: 'The profile name and link to the Instagram profile is:-',
       to: 'Meta Platforms, Inc.\n1 Meta Way,\nMenlo Park, CA 94025',
       items: [
@@ -89,8 +89,8 @@
     },
     telegram: {
       label: 'Telegram',
-      idLabel: 'Profile name & link',
-      idPlaceholder: 'Profile name: @XXXXXXX\nLink: https://www.t.me/xxxxxx',
+      namePlaceholder: '@XXXXXXX',
+      linkPlaceholder: 'https://www.t.me/xxxxxx',
       intro: 'The profile name and link to the Telegram account is:-',
       to: 'Telegram\nP. O Box 146\nRoad Town, Tortola,\nBritish Virgin Islands',
       items: [
@@ -145,6 +145,14 @@
     platformSel.appendChild(opt);
   });
 
+  // Facebook/Instagram/Telegram ask for a profile name and a link — two
+  // separate boxes. Everything else (WhatsApp numbers, Gmail IDs, a
+  // YouTube handle, "Other") asks for a list of one-per-line identifiers
+  // in a single box. A platform is "two-box" whenever it has a
+  // namePlaceholder in its preset above.
+  const idsTwoBox = qs('#b94IdsTwoBox');
+  const idsOneBox = qs('#b94IdsOneBox');
+
   // Filling in the preset overwrites whatever's in the To / Requested
   // details / identifier boxes — simplest behaviour, and matches how a
   // station will actually use this: pick the platform first, then fill in
@@ -153,8 +161,16 @@
   function applyPreset() {
     const p = PLATFORMS[platformSel.value];
     if (!p) return;
-    qs('#b94IdsLabel').textContent = p.idLabel + ' *';
-    qs('#b94Ids').placeholder = p.idPlaceholder;
+    const twoBox = !!p.namePlaceholder;
+    idsTwoBox.style.display = twoBox ? '' : 'none';
+    idsOneBox.style.display = twoBox ? 'none' : '';
+    if (twoBox) {
+      qs('#b94ProfileName').placeholder = p.namePlaceholder;
+      qs('#b94ProfileLink').placeholder = p.linkPlaceholder;
+    } else {
+      qs('#b94IdsLabel').textContent = p.idLabel + ' *';
+      qs('#b94Ids').placeholder = p.idPlaceholder;
+    }
     qs('#b94Recipient').value = p.to;
     qs('#b94Items').value = p.items.join('\n');
   }
@@ -166,6 +182,9 @@
 
   function collect() {
     const p = PLATFORMS[platformSel.value];
+    const twoBox = !!p.namePlaceholder;
+    const profileName = val('b94ProfileName');
+    const profileLink = val('b94ProfileLink');
     return {
       platformLabel: p.label,
       b94Intro: p.intro,
@@ -177,7 +196,11 @@
       b94CrimeNo: val('b94CrimeNo'),
       b94Sections: val('b94Sections'),
       b94Brief: val('b94Brief'),
-      b94Ids: val('b94Ids'),
+      b94ProfileName: profileName,
+      b94ProfileLink: profileLink,
+      b94Ids: twoBox
+        ? [profileName && `Profile name :- ${profileName}`, profileLink && `Link: ${profileLink}`].filter(Boolean).join('\n')
+        : val('b94Ids'),
       b94From: val('b94From'),
       b94To: val('b94To'),
       b94Items: val('b94Items'),
@@ -187,6 +210,7 @@
   }
 
   function validate(v) {
+    const p = PLATFORMS[platformSel.value];
     const errors = [];
     if (!v.b94Ps) errors.push('Police Station is required.');
     if (!v.b94LetterNo) errors.push('Letter No. is required.');
@@ -194,7 +218,12 @@
     if (!v.b94CrimeNo) errors.push('Crime No. is required.');
     if (!v.b94Sections) errors.push('Sec. of Law is required.');
     if (!v.b94Brief) errors.push('Brief of the case is required.');
-    if (!v.b94Ids) errors.push(`${PLATFORMS[platformSel.value].idLabel} is required.`);
+    if (p.namePlaceholder) {
+      if (!v.b94ProfileName) errors.push('Profile name is required.');
+      if (!v.b94ProfileLink) errors.push('Link is required.');
+    } else if (!v.b94Ids) {
+      errors.push(`${p.idLabel} is required.`);
+    }
     if (!v.b94Items) errors.push('Requested details is required — at least one line.');
     if (!v.b94Recipient) errors.push('Recipient (To) address is required.');
     if (v.b94From && v.b94To && v.b94From > v.b94To) errors.push('Records period: "from" date must not be after "to" date.');

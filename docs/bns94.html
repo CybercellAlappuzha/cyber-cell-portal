@@ -57,7 +57,7 @@
           <input type="text" id="b94Phone">
         </div>
         <div class="field">
-          <label for="b94Date">Date <span class="req">*</span></label>
+          <label for="b94Date">Date request prepared <span class="req">*</span></label>
           <input type="date" id="b94Date">
         </div>
         <div class="field">
@@ -77,8 +77,20 @@
 
     <fieldset>
       <legend>Account / profile identifier</legend>
-      <p class="hint" id="b94IdsLabel">Identifier *</p>
-      <textarea id="b94Ids" rows="2"></textarea>
+      <div class="grid" id="b94IdsTwoBox">
+        <div class="field">
+          <label for="b94ProfileName">Profile name <span class="req">*</span></label>
+          <input type="text" id="b94ProfileName">
+        </div>
+        <div class="field">
+          <label for="b94ProfileLink">Link <span class="req">*</span></label>
+          <input type="text" id="b94ProfileLink">
+        </div>
+      </div>
+      <div id="b94IdsOneBox">
+        <p class="hint" id="b94IdsLabel">Identifier *</p>
+        <textarea id="b94Ids" rows="2"></textarea>
+      </div>
     </fieldset>
 
     <fieldset>
@@ -122,6 +134,7 @@
 
 <script src="vendor/jspdf.umd.min.js"></script>
 <script src="vendor/jspdf.plugin.autotable.min.js"></script>
+<script src="kerala-emblem.js"></script>
 <script src="pdf-render.js"></script>
 <script src="bns94-render.js"></script>
 <script src="police-stations.js"></script>
