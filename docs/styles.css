@@ -138,4 +138,9 @@ button:disabled { opacity: .55; cursor: not-allowed; }
 .rows-repeat .row-item input { font-size: 13.5px; }
 /* Two-field variant (e.g. profile name + link) — no reason/name column. */
 .rows-repeat .row-item-2 { grid-template-columns: 1fr 1.6fr auto; }
+/* Column headers ("Account name" / "Account URL") sitting above a
+   rows-repeat of row-item-2s — same column widths, but its own rule since
+   it isn't nested inside .rows-repeat so the selector above won't reach it. */
+.row-item-2-header { display: grid; grid-template-columns: 1fr 1.6fr auto; gap: 8px; margin-bottom: 2px; }
+@media (max-width: 700px) { .row-item-2-header { display: none; } }
 @media (max-width: 700px) { .rows-repeat .row-item-2 { grid-template-columns: 1fr; } }
