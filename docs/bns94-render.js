@@ -20,7 +20,7 @@
   }
 
   function renderBns94(v) {
-    const { makeDoc, Cursor, fmtDate, MM, A4 } = window.PFPDF;
+    const { makeDoc, Cursor, fmtDate, MM, A4, CW } = window.PFPDF;
     const doc = makeDoc();
     const cur = new Cursor(doc);
 
@@ -81,29 +81,33 @@
     cur.para(crimeLine, { size: 11, after: 4 });
 
     // Identifier block — intro line from the platform preset (bold, as in
-    // the DEMO letters), then whatever the officer typed in (profile
-    // name/link, mobile numbers, Gmail IDs...), each line bold-labelled
-    // when it has a "Label: value" / "Label :- value" shape.
+    // the DEMO letters), then the details. A two-box platform (profile
+    // name + link) gets a proper 2-column table; a list-style platform
+    // (WhatsApp numbers, Gmail IDs, ...) keeps the plain line-by-line list.
     cur.room(6);
     doc.setFont('times', 'bold');
     doc.setFontSize(11);
     doc.text(v.b94Intro || 'Account / profile identifier:', MM.L, cur.y);
-    cur.y += 7;
-    doc.setFontSize(11);
-    lines(v.b94Ids).forEach((ln) => {
-      const m = ln.match(/^([^:]{1,40}:-?)\s*(.*)$/);
-      if (m) {
-        doc.setFont('times', 'bold');
-        doc.text(m[1] + ' ', MM.L, cur.y);
-        doc.setFont('times', 'normal');
-        doc.text(m[2], MM.L + doc.getTextWidth(m[1] + '  '), cur.y);
-        cur.y += 6;
-      } else {
-        doc.setFont('times', 'normal');
-        cur.para(ln, { size: 11, after: 1 });
-      }
-    });
-    cur.y += 2;
+    cur.y += 4;
+
+    if (v._profileRows && v._profileRows.length) {
+      doc.autoTable({
+        startY: cur.y,
+        margin: { left: MM.L, right: MM.R },
+        head: [['Profile name', 'Profile link']],
+        body: v._profileRows.map((r) => [r.name, r.link]),
+        styles: { font: 'times', fontSize: 10.5, lineColor: 20, lineWidth: 0.2, cellPadding: 2, valign: 'top' },
+        headStyles: { fillColor: false, textColor: 20, fontStyle: 'bold', lineWidth: 0.2, lineColor: 20 },
+        columnStyles: { 0: { cellWidth: CW * 0.35, fontStyle: 'bold' }, 1: { cellWidth: CW * 0.65, fontStyle: 'bold' } },
+        theme: 'grid',
+      });
+      cur.y = doc.lastAutoTable.finalY + 4;
+    } else {
+      doc.setFontSize(11);
+      doc.setFont('times', 'normal');
+      lines(v.b94Ids).forEach((ln) => cur.para(ln, { size: 11, after: 1 }));
+      cur.y += 2;
+    }
 
     cur.para(
       'The following details are necessary for further investigation of the case. Hence you are '
