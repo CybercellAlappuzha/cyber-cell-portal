@@ -20,7 +20,7 @@
   }
 
   function renderBns94(v) {
-    const { makeDoc, Cursor, footer, fmtDate, MM, A4 } = window.PFPDF;
+    const { makeDoc, Cursor, fmtDate, MM, A4 } = window.PFPDF;
     const doc = makeDoc();
     const cur = new Cursor(doc);
 
@@ -132,12 +132,8 @@
     cur.y += 14;
 
     cur.room(26);
-    doc.setFont('times', 'normal');
-    doc.setFontSize(10.5);
-    doc.text('(signature of IO)', A4.w - MM.R, cur.y, { align: 'right' });
-    cur.y += 12;
-    doc.text('(Round seal)', MM.L + 20, cur.y);
     doc.setFont('times', 'bold');
+    doc.setFontSize(10.5);
     doc.text('STATION HOUSE OFFICER', A4.w - MM.R, cur.y, { align: 'right' });
     cur.y += 5;
     doc.text(v.b94Ps || '', A4.w - MM.R, cur.y, { align: 'right' });
@@ -156,7 +152,9 @@
       cur.y += 5;
     });
 
-    footer(doc);
+    // No footer here (unlike pdf-render.js's proforma) — the office asked
+    // for this letter without the "Confidential..." line or the
+    // attribution watermark.
     return doc;
   }
 
