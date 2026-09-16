@@ -24,22 +24,21 @@
     const doc = makeDoc();
     const cur = new Cursor(doc);
 
-    // Letterhead: a larger Kerala Police emblem, centered above "Station
-    // House Officer / <station>" (both centered on the same axis), with a
-    // matching right-aligned "Inspector of Police / <station> / Alappuzha /
+    // Letterhead: a larger Kerala Police emblem flush with the left margin,
+    // with "Station House Officer / <station>" left-aligned beneath it, and
+    // a matching right-aligned "Inspector of Police / <station> / Alappuzha /
     // Pin / Phone / Dated" block — same two-column header the office's own
     // DEMO letters use.
     const headTop = cur.y;
-    const leftColCenter = MM.L + 45;
     const emblemW = 32;
     const emblemH = (emblemW * 190) / 303;
     if (window.KERALA_EMBLEM_PNG) {
-      doc.addImage(window.KERALA_EMBLEM_PNG, 'PNG', leftColCenter - emblemW / 2, headTop, emblemW, emblemH);
+      doc.addImage(window.KERALA_EMBLEM_PNG, 'PNG', MM.L, headTop, emblemW, emblemH);
     }
     doc.setFont('times', 'bold');
     doc.setFontSize(11);
-    doc.text('STATION HOUSE OFFICER', leftColCenter, headTop + emblemH + 5, { align: 'center' });
-    doc.text(v.b94Ps || '', leftColCenter, headTop + emblemH + 10, { align: 'center' });
+    doc.text('STATION HOUSE OFFICER', MM.L, headTop + emblemH + 5);
+    doc.text(v.b94Ps || '', MM.L, headTop + emblemH + 10);
 
     let ry = headTop + 4;
     doc.setFont('times', 'bold');
