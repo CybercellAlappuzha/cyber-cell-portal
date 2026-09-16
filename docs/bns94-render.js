@@ -32,11 +32,12 @@
     const headTop = cur.y;
     const emblemW = 32;
     const emblemH = (emblemW * 190) / 303;
-    if (window.KERALA_EMBLEM_PNG) {
-      doc.addImage(window.KERALA_EMBLEM_PNG, 'PNG', MM.L, headTop, emblemW, emblemH);
-    }
     doc.setFont('times', 'bold');
     doc.setFontSize(11);
+    const shoTextCenter = MM.L + doc.getTextWidth('STATION HOUSE OFFICER') / 2;
+    if (window.KERALA_EMBLEM_PNG) {
+      doc.addImage(window.KERALA_EMBLEM_PNG, 'PNG', shoTextCenter - emblemW / 2, headTop, emblemW, emblemH);
+    }
     doc.text('STATION HOUSE OFFICER', MM.L, headTop + emblemH + 5);
     doc.text(v.b94Ps || '', MM.L, headTop + emblemH + 10);
 
