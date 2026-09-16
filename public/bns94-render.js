@@ -24,20 +24,22 @@
     const doc = makeDoc();
     const cur = new Cursor(doc);
 
-    // Letterhead: Kerala Police emblem top-left, "Station House Officer /
-    // <station>" beneath it, and a matching right-aligned "Inspector of
-    // Police / <station> / Alappuzha / Pin / Phone / Dated" block — same
-    // two-column header the office's own DEMO letters use.
+    // Letterhead: a larger Kerala Police emblem, centered above "Station
+    // House Officer / <station>" (both centered on the same axis), with a
+    // matching right-aligned "Inspector of Police / <station> / Alappuzha /
+    // Pin / Phone / Dated" block — same two-column header the office's own
+    // DEMO letters use.
     const headTop = cur.y;
+    const leftColCenter = MM.L + 45;
+    const emblemW = 32;
+    const emblemH = (emblemW * 190) / 303;
     if (window.KERALA_EMBLEM_PNG) {
-      const w = 22;
-      const h = (w * 190) / 303;
-      doc.addImage(window.KERALA_EMBLEM_PNG, 'PNG', MM.L, headTop, w, h);
+      doc.addImage(window.KERALA_EMBLEM_PNG, 'PNG', leftColCenter - emblemW / 2, headTop, emblemW, emblemH);
     }
     doc.setFont('times', 'bold');
     doc.setFontSize(11);
-    doc.text('STATION HOUSE OFFICER', MM.L, headTop + 20);
-    doc.text(v.b94Ps || '', MM.L, headTop + 25);
+    doc.text('STATION HOUSE OFFICER', leftColCenter, headTop + emblemH + 5, { align: 'center' });
+    doc.text(v.b94Ps || '', leftColCenter, headTop + emblemH + 10, { align: 'center' });
 
     let ry = headTop + 4;
     doc.setFont('times', 'bold');
@@ -54,7 +56,7 @@
     doc.setFont('times', 'bold');
     doc.text('Dated: ' + (fmtDate(v.b94Date) || ''), A4.w - MM.R, ry, { align: 'right' });
 
-    cur.y = Math.max(headTop + 27, ry) + 8;
+    cur.y = Math.max(headTop + emblemH + 10, ry) + 8;
 
     // Centered, underlined, bold — Letter No. and title stacked, same as
     // the DEMO letters.
