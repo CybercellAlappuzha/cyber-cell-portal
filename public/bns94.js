@@ -50,8 +50,8 @@
       const div = document.createElement('div');
       div.className = 'row-item row-item-2';
       div.innerHTML = `
-        <input class="prof-name" placeholder="${esc(namePh || 'Profile name')}" value="${esc(name || '')}">
-        <input class="prof-link" placeholder="${esc(linkPh || 'Link')}" value="${esc(link || '')}">
+        <input class="prof-name" placeholder="${esc(namePh || 'Account name')}" value="${esc(name || '')}">
+        <input class="prof-link" placeholder="${esc(linkPh || 'Account URL')}" value="${esc(link || '')}">
         <button type="button" class="secondary small remove-row">Remove</button>
       `;
       div.querySelector('.remove-row').addEventListener('click', () => {
