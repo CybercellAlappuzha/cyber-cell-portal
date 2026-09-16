@@ -279,16 +279,26 @@
 
   const form = qs('#b94Form');
   const formMsg = qs('#formMsg');
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
+
+  // Shared by both the PDF and Word buttons: collect + validate, and show
+  // the same error box either way. Returns null (with errors already shown)
+  // when the form isn't ready to generate.
+  function collectValid() {
     formMsg.innerHTML = '';
     const v = collect();
     const errors = validate(v);
     if (errors.length) {
       formMsg.innerHTML = `<div class="msg error"><strong>Please fix the following:</strong><ul>${errors.map((m) => `<li>${esc(m)}</li>`).join('')}</ul></div>`;
       formMsg.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      return;
+      return null;
     }
+    return v;
+  }
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const v = collectValid();
+    if (!v) return;
     try {
       const doc = window.BNS94PDF.renderBns94(v);
       const filename = `Section94_${slug(v.platformLabel)}_${slug(v.b94CrimeNo)}.pdf`;
@@ -299,4 +309,89 @@
     }
     formMsg.scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
+
+  // Editable Word doc: same content as the PDF, built as HTML and saved
+  // with a .doc extension — the standard trick for a Word-openable,
+  // fully-editable file without pulling in a docx-building library. Word
+  // shows a one-time "different format" prompt on open; the content and
+  // formatting (bold labels, the profile table) come through fine.
+  qs('#genWordBtn').addEventListener('click', () => {
+    const v = collectValid();
+    if (!v) return;
+    try {
+      const html = buildBns94Html(v);
+      const blob = new Blob(['﻿', html], { type: 'application/msword' });
+      const url = URL.createObjectURL(blob);
+      const filename = `Section94_${slug(v.platformLabel)}_${slug(v.b94CrimeNo)}.doc`;
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      formMsg.innerHTML = `<div class="msg ok">Generated <strong>${esc(filename)}</strong>. Check your browser's downloads.</div>`;
+    } catch (err) {
+      formMsg.innerHTML = `<div class="msg error">Could not generate the Word file: ${esc(err.message || err)}</div>`;
+    }
+    formMsg.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+
+  function linesArr(t) {
+    return String(t || '').split(/\r?\n/).map((s) => s.trim()).filter(Boolean);
+  }
+
+  function buildBns94Html(v) {
+    const fmtDate = window.PFPDF.fmtDate;
+    const from = fmtDate(v.b94From) || '__________';
+    const to = fmtDate(v.b94To) || '__________';
+
+    const itemsHtml = linesArr(v.b94Items)
+      .map((item, i) => `<p style="margin:2px 0">${i + 1}. ${esc(item.replace('{FROM}', from).replace('{TO}', to))}</p>`)
+      .join('');
+
+    const idHtml = (v._profileRows && v._profileRows.length)
+      ? `<table border="1" cellspacing="0" cellpadding="5" style="border-collapse:collapse;width:100%">
+          <tr><th align="left">Profile name</th><th align="left">Profile link</th></tr>
+          ${v._profileRows.map((r) => `<tr><td>${esc(r.name)}</td><td>${esc(r.link)}</td></tr>`).join('')}
+        </table>`
+      : linesArr(v.b94Ids).map((ln) => `<p style="margin:2px 0">${esc(ln)}</p>`).join('');
+
+    const recipientHtml = linesArr(v.b94Recipient).map((ln) => `<p style="margin:0 0 0 40px"><b>${esc(ln)}</b></p>`).join('');
+
+    return `<!DOCTYPE html><html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+<head><meta charset="utf-8"><title>Section 94 BNSS Request</title></head>
+<body style="font-family:'Times New Roman',serif;font-size:12pt">
+<table style="width:100%;border:none"><tr>
+<td style="width:50%;vertical-align:top">
+${window.KERALA_EMBLEM_PNG ? `<img src="${window.KERALA_EMBLEM_PNG}" style="width:110px;display:block;margin:0 auto">` : ''}
+<p style="text-align:center;font-weight:bold;margin:4px 0 0">STATION HOUSE OFFICER</p>
+<p style="text-align:center;font-weight:bold;margin:0">${esc(v.b94Ps || '')}</p>
+</td>
+<td style="width:50%;vertical-align:top;text-align:right">
+<p style="font-weight:bold;margin:0">INSPECTOR OF POLICE</p>
+<p style="font-weight:bold;margin:0">${esc(v.b94Ps || '')}</p>
+<p style="font-weight:bold;margin:0">ALAPPUZHA</p>
+${v.b94Pin ? `<p style="margin:0">Pin - ${esc(v.b94Pin)}</p>` : ''}
+${v.b94Phone ? `<p style="margin:0">Phone Office - ${esc(v.b94Phone)}</p>` : ''}
+<p style="font-weight:bold;margin:0">Dated: ${esc(fmtDate(v.b94Date) || '')}</p>
+</td>
+</tr></table>
+<p style="text-align:center;font-weight:bold;text-decoration:underline;margin:16px 0 4px">Letter No. ${esc(v.b94LetterNo || '')}</p>
+<p style="text-align:center;font-weight:bold;text-decoration:underline;margin:0 0 16px">Notice under section 94 of the Bharatiya Nagarik Suraksha Sanhita</p>
+<p>A Crime has been registered in ${esc(v.b94Ps || '__________')} as Crime Number ${esc(v.b94CrimeNo || '__________')} U/s. ${esc(v.b94Sections || '__________')}. ${esc(v.b94Brief || '')}</p>
+<p style="font-weight:bold">${esc(v.b94Intro || 'Account / profile identifier:')}</p>
+${idHtml}
+<p>The following details are necessary for further investigation of the case. Hence you are requested to furnish the following details as early as possible.</p>
+${itemsHtml}
+${v.b94ReplyEmail ? `<p>Please provide the reply to ${esc(v.b94ReplyEmail)}</p>` : ''}
+<p style="text-align:center;margin-top:24px">Regards,</p>
+<p style="margin-left:180px">Yours faithfully,</p>
+<p style="text-align:right;font-weight:bold;margin-top:60px">STATION HOUSE OFFICER</p>
+<p style="text-align:right;font-weight:bold;margin:0">${esc(v.b94Ps || '')}</p>
+<p style="text-align:right;font-weight:bold;margin:0">ALAPPUZHA</p>
+<p style="margin-top:20px">To,</p>
+${recipientHtml}
+</body></html>`;
+  }
 })();
