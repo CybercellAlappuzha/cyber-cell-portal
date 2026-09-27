@@ -104,6 +104,24 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--accent); ou
 .ac-list .ac-opt:hover, .ac-list .ac-opt.active { background: var(--accent-soft); }
 .ac-list .ac-empty { padding: 7px 10px; font-size: 13px; color: var(--muted); font-style: italic; }
 
+/* Cross-link banner between the main proforma and the Section 94 BNSS page —
+   deliberately louder than the muted .hint text above it, since users were
+   missing the plain inline link version. */
+.switch-banner {
+  display: flex; align-items: center; justify-content: space-between; gap: 14px;
+  flex-wrap: wrap;
+  background: var(--accent-soft); border: 1px solid var(--accent);
+  border-radius: 10px; padding: 14px 18px; margin: 0 0 16px;
+  text-decoration: none; color: var(--accent-dark);
+}
+.switch-banner:hover { background: #dcebfb; }
+.switch-banner-text { font-size: 14px; line-height: 1.4; }
+.switch-banner-text strong { display: block; font-size: 15px; margin-bottom: 2px; }
+.switch-banner-cta {
+  font-weight: 700; font-size: 13.5px; white-space: nowrap;
+  background: var(--accent); color: #fff; padding: 8px 14px; border-radius: 7px;
+}
+
 fieldset { border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px 14px; margin: 0 0 14px; }
 legend { font-size: 13px; font-weight: 600; color: var(--accent-dark); padding: 0 6px; }
 
