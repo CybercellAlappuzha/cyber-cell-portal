@@ -383,7 +383,6 @@
       startY: cur.y,
       margin: { left: MM.L, right: MM.R },
       body: [
-        ['Justification of the Investigation Officer for taking the details.', v.pfJust || ''],
         [
           'Remarks if any',
           [sel.length ? 'Details requested: ' + sel.join(', ') + '.' : '', v.pfRemarks || '']

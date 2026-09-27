@@ -301,7 +301,6 @@
       pfSim: checked('pfSim'),
       pfFrom: val('pfFrom'),
       pfTo: val('pfTo'),
-      pfJust: val('pfJust'),
       pfRemarks: val('pfRemarks'),
     };
   }
@@ -330,7 +329,6 @@
     if (v.pfFrom && v.pfTo && v.pfFrom > v.pfTo) {
       errors.push('Required period: "from" date must not be after "to" date.');
     }
-    if (!v.pfJust) errors.push('Justification of the Investigating Officer is required.');
     if (v.pfAadhaar) {
       const bad = (v._numbers || []).filter((n) => !isValidAadhaar(n));
       if (bad.length) {
