@@ -31,7 +31,7 @@
     // DEMO letters use.
     const headTop = cur.y;
     const emblemW = 32;
-    const emblemH = (emblemW * 190) / 303;
+    const emblemH = (emblemW * 268) / 284; // new round KERALA POLICE seal is ~284x268
     doc.setFont('times', 'bold');
     doc.setFontSize(11);
     const shoTextCenter = MM.L + doc.getTextWidth('STATION HOUSE OFFICER') / 2;
