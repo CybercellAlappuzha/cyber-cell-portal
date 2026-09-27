@@ -39,13 +39,10 @@
       doc.addImage(window.KERALA_EMBLEM_PNG, 'PNG', shoTextCenter - emblemW / 2, headTop, emblemW, emblemH);
     }
     doc.text('STATION HOUSE OFFICER', MM.L, headTop + emblemH + 5);
-    doc.text(v.b94Ps || '', MM.L, headTop + emblemH + 10);
 
     let ry = headTop + 4;
     doc.setFont('times', 'bold');
     doc.setFontSize(11);
-    doc.text('INSPECTOR OF POLICE', A4.w - MM.R, ry, { align: 'right' });
-    ry += 5;
     doc.text(v.b94Ps || '', A4.w - MM.R, ry, { align: 'right' });
     ry += 5;
     doc.text('ALAPPUZHA', A4.w - MM.R, ry, { align: 'right' });
