@@ -19,10 +19,18 @@
       .filter(Boolean);
   }
 
-  function renderBns94(v) {
+  // Body content (crime line, profile table, requested-details list,
+  // recipient...) grows with what the officer typed in, and can spill onto
+  // a second page. Rather than accept that, build the letter at a font/
+  // spacing scale, and if it doesn't fit on one page, retry progressively
+  // smaller — same idea as the main proforma's row-shrinking, applied to a
+  // free-form letter instead of a table. The letterhead itself is left at
+  // full size since it's fixed height regardless of content.
+  function build(v, scale) {
     const { makeDoc, Cursor, fmtDate, MM, A4, CW } = window.PFPDF;
     const doc = makeDoc();
     const cur = new Cursor(doc);
+    const s = (n) => n * scale;
 
     // Letterhead: a larger Kerala Police emblem flush with the left margin,
     // with "Station House Officer / <station>" left-aligned beneath it, and
@@ -53,39 +61,41 @@
     doc.setFont('times', 'bold');
     doc.text('Dated: ' + (fmtDate(v.b94Date) || ''), A4.w - MM.R, ry, { align: 'right' });
 
-    cur.y = Math.max(headTop + emblemH + 10, ry) + 8;
+    cur.y = Math.max(headTop + emblemH + 10, ry) + s(8);
 
     // Centered, underlined, bold — Letter No. and title stacked, same as
     // the DEMO letters.
     doc.setFont('times', 'bold');
-    doc.setFontSize(11.5);
+    doc.setFontSize(Math.max(9, s(11.5)));
     const letterNoText = 'Letter No. ' + (v.b94LetterNo || '');
     doc.text(letterNoText, A4.w / 2, cur.y, { align: 'center' });
     let w0 = doc.getTextWidth(letterNoText);
     doc.line(A4.w / 2 - w0 / 2, cur.y + 0.8, A4.w / 2 + w0 / 2, cur.y + 0.8);
-    cur.y += 6.5;
+    cur.y += s(6.5);
     const titleText = 'Notice under section 94 of the Bharatiya Nagarik Suraksha Sanhita';
     doc.text(titleText, A4.w / 2, cur.y, { align: 'center' });
     w0 = doc.getTextWidth(titleText);
     doc.line(A4.w / 2 - w0 / 2, cur.y + 0.8, A4.w / 2 + w0 / 2, cur.y + 0.8);
-    cur.y += 9;
+    cur.y += s(9);
+
+    const bodySize = Math.max(8.5, s(11));
 
     // Police-station names already end in "Police Station" (see
     // police-stations.js), so it's used as-is here rather than appending
     // "Police Station" again.
     const crimeLine = `A Crime has been registered in ${v.b94Ps || '__________'} as Crime `
       + `Number ${v.b94CrimeNo || '__________'} U/s. ${v.b94Sections || '__________'}. ${v.b94Brief || ''}`;
-    cur.para(crimeLine, { size: 11, after: 4 });
+    cur.para(crimeLine, { size: bodySize, after: s(4) });
 
     // Identifier block — intro line from the platform preset (bold, as in
     // the DEMO letters), then the details. A two-box platform (profile
     // name + link) gets a proper 2-column table; a list-style platform
     // (WhatsApp numbers, Gmail IDs, ...) keeps the plain line-by-line list.
-    cur.room(6);
+    cur.room(s(6));
     doc.setFont('times', 'bold');
-    doc.setFontSize(11);
+    doc.setFontSize(bodySize);
     doc.text(v.b94Intro || 'Account / profile identifier:', MM.L, cur.y);
-    cur.y += 4;
+    cur.y += s(4);
 
     if (v._profileRows && v._profileRows.length) {
       doc.autoTable({
@@ -93,71 +103,84 @@
         margin: { left: MM.L, right: MM.R },
         head: [['Profile name', 'Profile link']],
         body: v._profileRows.map((r) => [r.name, r.link]),
-        styles: { font: 'times', fontSize: 10.5, lineColor: 20, lineWidth: 0.2, cellPadding: 2, valign: 'top' },
+        styles: { font: 'times', fontSize: Math.max(7, s(10.5)), lineColor: 20, lineWidth: 0.2, cellPadding: Math.max(0.8, s(2)), valign: 'top' },
         headStyles: { fillColor: false, textColor: 20, fontStyle: 'bold', lineWidth: 0.2, lineColor: 20 },
         columnStyles: { 0: { cellWidth: CW * 0.35, fontStyle: 'bold' }, 1: { cellWidth: CW * 0.65, fontStyle: 'bold' } },
         theme: 'grid',
       });
-      cur.y = doc.lastAutoTable.finalY + 4;
+      cur.y = doc.lastAutoTable.finalY + s(4);
     } else {
-      doc.setFontSize(11);
+      doc.setFontSize(bodySize);
       doc.setFont('times', 'normal');
-      lines(v.b94Ids).forEach((ln) => cur.para(ln, { size: 11, after: 1 }));
-      cur.y += 2;
+      lines(v.b94Ids).forEach((ln) => cur.para(ln, { size: bodySize, after: s(1) }));
+      cur.y += s(2);
     }
 
     cur.para(
       'The following details are necessary for further investigation of the case. Hence you are '
         + 'requested to furnish the following details as early as possible.',
-      { size: 11, after: 4 }
+      { size: bodySize, after: s(4) }
     );
 
     const from = fmtDate(v.b94From) || '__________';
     const to = fmtDate(v.b94To) || '__________';
     lines(v.b94Items).forEach((item, i) => {
       const text = item.replace('{FROM}', from).replace('{TO}', to);
-      cur.para(`${i + 1}. ${text}`, { size: 11, after: 2.5 });
+      cur.para(`${i + 1}. ${text}`, { size: bodySize, after: s(2.5) });
     });
-    cur.y += 2;
+    cur.y += s(2);
 
     if (v.b94ReplyEmail) {
-      cur.para('Please provide the reply to ' + v.b94ReplyEmail, { size: 11, after: 3 });
+      cur.para('Please provide the reply to ' + v.b94ReplyEmail, { size: bodySize, after: s(3) });
     }
 
     // "Regards," centered, "Yours faithfully," staggered further right
     // beneath it — matches the DEMO letters' odd but consistent layout.
     doc.setFont('times', 'normal');
-    doc.setFontSize(11);
-    cur.room(10);
+    doc.setFontSize(bodySize);
+    cur.room(s(10));
     doc.text('Regards,', A4.w / 2 + 10, cur.y, { align: 'center' });
-    cur.y += 6;
+    cur.y += s(6);
     doc.text('Yours faithfully,', A4.w / 2 + 25, cur.y);
-    cur.y += 14;
+    cur.y += s(14);
 
-    cur.room(26);
+    cur.room(s(26));
     doc.setFont('times', 'bold');
-    doc.setFontSize(10.5);
+    doc.setFontSize(Math.max(8, s(10.5)));
     doc.text('STATION HOUSE OFFICER', A4.w - MM.R, cur.y, { align: 'right' });
-    cur.y += 5;
+    cur.y += s(5);
     doc.text(v.b94Ps || '', A4.w - MM.R, cur.y, { align: 'right' });
-    cur.y += 5;
+    cur.y += s(5);
     doc.text('ALAPPUZHA', A4.w - MM.R, cur.y, { align: 'right' });
-    cur.y += 10;
+    cur.y += s(10);
 
     doc.setFont('times', 'normal');
-    doc.setFontSize(11);
-    cur.room(6 + lines(v.b94Recipient).length * 5);
+    doc.setFontSize(bodySize);
+    cur.room(s(6) + lines(v.b94Recipient).length * s(5));
     doc.text('To,', MM.L, cur.y);
-    cur.y += 5;
+    cur.y += s(5);
     doc.setFont('times', 'bold');
     lines(v.b94Recipient).forEach((ln) => {
       doc.text(ln, MM.L + 12, cur.y);
-      cur.y += 5;
+      cur.y += s(5);
     });
 
     // No footer here (unlike pdf-render.js's proforma) — the office asked
     // for this letter without the "Confidential..." line or the
     // attribution watermark.
+    return doc;
+  }
+
+  function renderBns94(v) {
+    // Try full size first, then shrink font + spacing in steps until the
+    // whole letter fits on one page. Floors out at 0.8 rather than going
+    // smaller still and hurting readability — a letter that's still too
+    // long at that point just prints on two pages.
+    const scales = [1, 0.93, 0.87, 0.8];
+    let doc = build(v, scales[0]);
+    for (let i = 1; i < scales.length && doc.internal.getNumberOfPages() > 1; i += 1) {
+      doc = build(v, scales[i]);
+    }
     return doc;
   }
 
