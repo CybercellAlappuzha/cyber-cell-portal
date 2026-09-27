@@ -407,6 +407,17 @@
     doc.text('Name, Signature of I/O with Date', A4.w / 2, cur.y + 3, { align: 'center' });
     cur.y += 9;
 
+    // Only printed when the requested period actually exceeds six months
+    // (see app.js periodWarnings/_dpcNote) — the officer has confirmed DPC
+    // approval was obtained, so it isn't a blanket claim on every proforma.
+    if (v._dpcNote) {
+      cur.para(
+        'Prior approval has been obtained from the Hon’ble District Police Chief to collect '
+          + 'information pertaining to a period exceeding six months.',
+        { size: 9.5, bold: true, align: 'center', after: 3 }
+      );
+    }
+
     // Verified-by / Recommended-by signature table — left blank in the body
     // row so the SHO and SDPO sign and seal it by hand after printing,
     // exactly as in the office's own "New <TYPE> performa.doc" templates.

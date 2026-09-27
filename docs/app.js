@@ -455,6 +455,7 @@
         // IMEI rows so this PDF's subscriber table lists IMEIs, not the
         // general box's phone numbers.
         if (job.flags.includes('pfImeiTrace')) v1.pfRows = v.pfImeiRows;
+        v1._dpcNote = periodWarnings(v1).length > 0;
         const doc = window.PFPDF.renderProforma(v1);
         const filename = `Proforma_${job.tag}_${crimeTag}_${dateStr}.pdf`;
         doc.save(filename);
